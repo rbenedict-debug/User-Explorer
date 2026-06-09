@@ -1,6 +1,32 @@
 <div class="ds-page-content__heading">
-  <h1 class="ds-page-content__title">Users</h1>
+  <h1 class="ds-page-content__title">User Explorer</h1>
 </div>
 <div class="ds-page-content__main">
-  <!-- Build your page content here -->
+
+  <!-- ── Section 1 · Users by Role ───────────────────────────────────────────
+       Filler role names and user counts — placeholder, to be refined.
+       Each card opens that role's child page (users/:role). -->
+  <section class="user-explorer-section" aria-labelledby="users-by-role-title">
+    <h2 class="ds-form-section-title" id="users-by-role-title">Users by Role</h2>
+
+    <div class="user-roles-grid">
+      @for (role of roles; track role.slug) {
+        <a class="ds-card-item ds-card-item--interactive" [routerLink]="['/users', role.slug]">
+          <div class="ds-card-item__leading">
+            <span [class]="'role-icon role-icon--' + role.color">
+              <span class="ds-icon ds-icon--filled" aria-hidden="true">{{ role.icon }}</span>
+            </span>
+          </div>
+          <div class="ds-card-item__body">
+            <span class="ds-card-item__primary">{{ role.name }}</span>
+            <span class="ds-card-item__secondary">{{ role.count }}</span>
+          </div>
+          <div class="ds-card-item__trailing">
+            <span class="ds-icon ds-icon--sm" aria-hidden="true">chevron_right</span>
+          </div>
+        </a>
+      }
+    </div>
+  </section>
+
 </div>

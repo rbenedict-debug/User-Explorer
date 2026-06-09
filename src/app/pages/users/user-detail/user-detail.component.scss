@@ -1,0 +1,9 @@
+// Match the User Explorer page: 24px padding inside the content card.
+.ds-page-content__main {
+  padding: var(--spacing-xl);
+}
+
+.user-detail__placeholder {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

@@ -1,3 +1,5 @@
+@use '@onflo/design-system/tokens/scss' as ds;
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -6,4 +8,53 @@ html, body {
   height: 100%;
   margin: 0;
   overflow: hidden;
+}
+
+// Breadcrumb — shared wayfinding pattern across the User Explorer drill-down
+// (User Explorer › Role › User). Not a DS component yet; token-based stand-in.
+// TODO eng: promote to a real ds-breadcrumb component.
+.breadcrumb {
+  margin-bottom: var(--spacing-sm);
+
+  &__list {
+    @include ds.type-body-small;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item,
+  &__sep {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__sep {
+    color: var(--color-icon-subtle);
+  }
+
+  &__link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+    }
+
+    &:focus { outline: none; }
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--color-border-ada-focus-ring);
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  &__current {
+    color: var(--color-text-primary);
+  }
 }

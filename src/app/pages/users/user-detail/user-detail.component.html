@@ -1,0 +1,29 @@
+<div class="ds-page-content__heading">
+  <!-- Breadcrumb: User Explorer › Role › User (styles in global src/styles.scss). -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol class="breadcrumb__list">
+      <li class="breadcrumb__item">
+        <a class="breadcrumb__link" routerLink="/users">User Explorer</a>
+      </li>
+      <li class="breadcrumb__sep" aria-hidden="true">
+        <span class="ds-icon ds-icon--xs">chevron_right</span>
+      </li>
+      <li class="breadcrumb__item">
+        <a class="breadcrumb__link" [routerLink]="['/users', role()?.slug]">{{ role()?.name ?? 'Role' }}</a>
+      </li>
+      <li class="breadcrumb__sep" aria-hidden="true">
+        <span class="ds-icon ds-icon--xs">chevron_right</span>
+      </li>
+      <li class="breadcrumb__item">
+        <span class="breadcrumb__current" aria-current="page">{{ user()?.name ?? 'User' }}</span>
+      </li>
+    </ol>
+  </nav>
+  <h1 class="ds-page-content__title">{{ user()?.name ?? 'User' }}</h1>
+</div>
+<div class="ds-page-content__main">
+  <!-- TODO: user-specific page content goes here (pending direction). -->
+  <p class="user-detail__placeholder">
+    Detail page for <strong>{{ user()?.name ?? 'this user' }}</strong> — content coming next.
+  </p>
+</div>

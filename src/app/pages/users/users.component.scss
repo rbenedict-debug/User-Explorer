@@ -1,0 +1,56 @@
+// 24px padding inside the content card that holds the page sections (--spacing-xl).
+.ds-page-content__main {
+  padding: var(--spacing-xl);
+}
+
+// Spacing between stacked page sections (section 1, 2, …).
+.user-explorer-section + .user-explorer-section {
+  margin-top: var(--spacing-xl);
+}
+
+// Responsive grid of role cards.
+.user-roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+// Stock ds-card-item is a compact 56px row with no vertical padding
+// (padding: 0 --spacing-md). Add top/bottom padding for the roomier feel
+// from the reference design — horizontal padding is left to the DS.
+.user-roles-grid .ds-card-item {
+  padding-top: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  // Cards are anchors (navigate to the role page) — strip link styling.
+  text-decoration: none;
+  color: inherit;
+}
+
+// Card-item icon slots sit 12px in from the card edge
+// (token equivalent of the demo's inline `padding: 0 12px`).
+.user-roles-grid .ds-card-item__leading,
+.user-roles-grid .ds-card-item__trailing {
+  padding: 0 var(--spacing-md);
+}
+
+// Leading icon tile: a filled icon on a paired accent surface tint.
+// Each modifier pairs --color-surface-accent-{c} with --color-icon-accent-{c}.
+.role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+
+  .ds-icon { color: inherit; }
+}
+
+.role-icon--blue   { background: var(--color-surface-accent-blue);   color: var(--color-icon-accent-blue); }
+.role-icon--teal   { background: var(--color-surface-accent-teal);   color: var(--color-icon-accent-teal); }
+.role-icon--purple { background: var(--color-surface-accent-purple); color: var(--color-icon-accent-purple); }
+.role-icon--orange { background: var(--color-surface-accent-orange); color: var(--color-icon-accent-orange); }
+.role-icon--green  { background: var(--color-surface-accent-green);  color: var(--color-icon-accent-green); }
+.role-icon--pink   { background: var(--color-surface-accent-pink);   color: var(--color-icon-accent-pink); }

@@ -65,7 +65,7 @@ export class App implements AfterViewInit, OnDestroy {
   get activeNavLabel(): string {
     const labels: Record<NavSection, string> = {
       tickets: 'Tickets', assets: 'Assets',
-      users: 'Users', analytics: 'Analytics', settings: 'Settings',
+      users: 'User Explorer', analytics: 'Analytics', settings: 'Settings',
     };
     return labels[this.activeNav];
   }

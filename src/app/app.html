@@ -108,7 +108,8 @@
     </header>
 
     <div class="ds-page-layout__body">
-      <!-- Subnav — content varies by active nav section -->
+      <!-- Subnav — content varies by active nav section. Users has no subnav. -->
+      @if (activeNav !== 'users') {
       <nav class="ds-subnav" [class.is-collapsed]="!subNavOpen" role="navigation" aria-label="Section navigation">
 
         @if (activeNav === 'tickets') {
@@ -503,12 +504,14 @@
         }
 
       </nav>
+      }
 
       <!-- Routed page content -->
       <router-outlet />
     </div>
   </div>
 
+  @if (activeNav !== 'users') {
   <button class="ds-nav-expand"
           [class.is-collapsed]="!subNavOpen"
           type="button"
@@ -521,5 +524,6 @@
       <span class="ds-icon ds-icon--filled" aria-hidden="true">right_panel_close</span>
     }
   </button>
+  }
 
 </div>
