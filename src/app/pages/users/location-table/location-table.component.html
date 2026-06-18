@@ -10,11 +10,11 @@
         <span class="ds-icon ds-icon--xs">chevron_right</span>
       </li>
       <li class="breadcrumb__item">
-        <span class="breadcrumb__current" aria-current="page">{{ role()?.name ?? 'Role' }}</span>
+        <span class="breadcrumb__current" aria-current="page">{{ group?.name ?? 'Location' }}</span>
       </li>
     </ol>
   </nav>
-  <h1 class="ds-page-content__title">{{ role()?.name ?? 'Role' }}</h1>
+  <h1 class="ds-page-content__title">{{ group?.name ?? 'Location' }}</h1>
 </div>
 
 <div class="ds-page-content__main ds-page-content__main--table">
@@ -103,10 +103,10 @@
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:180px">
+                <th style="width:160px">
                   <div class="ds-table__header-content">
-                    <span class="ds-table__header-label">Location</span>
-                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Location">
+                    <span class="ds-table__header-label">Role</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Role">
                       <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
                     </button>
                   </div>
@@ -121,7 +121,7 @@
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:160px">
+                <th style="width:150px">
                   <div class="ds-table__header-content">
                     <span class="ds-table__header-label">Last Active</span>
                     <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Last Active">
@@ -146,7 +146,7 @@
                 <tr>
                   <td>{{ user.name }}</td>
                   <td>{{ user.email }}</td>
-                  <td>{{ user.location }}</td>
+                  <td>{{ roleLabel(user.role) }}</td>
                   <td>
                     @if (user.status === 'Active') {
                       <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--green">Active</span>
@@ -514,4 +514,4 @@
 </div>
 
 <!-- table-init.js is loaded via angular.json scripts; the initTable() config
-     lives in role-detail.component.ts → ngAfterViewInit(). -->
+     lives in location-table.component.ts → ngAfterViewInit(). -->

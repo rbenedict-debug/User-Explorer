@@ -1,3 +1,5 @@
+@use '@onflo/design-system/tokens/scss' as ds;
+
 // 24px padding inside the content card that holds the page sections (--spacing-xl).
 .ds-page-content__main {
   padding: var(--spacing-xl);
@@ -8,7 +10,234 @@
   margin-top: var(--spacing-xl);
 }
 
-// Responsive grid of role cards.
+// ── Search ──────────────────────────────────────────────────────────────────
+// Typeahead wrapper: positions the results panel under the field.
+.user-search {
+  position: relative;
+  margin-bottom: var(--spacing-xl);
+}
+
+// Results dropdown — stock ds-menu; this class only positions it under the
+// field (in eng, the CDK overlay owns positioning). The width overrides lift
+// the DS dropdown cap so the panel spans the full search field.
+.user-search__menu {
+  position: absolute;
+  top: calc(100% + var(--spacing-xs));
+  left: 0;
+  right: 0;
+  z-index: 10;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+
+  // Never flow past the viewport: the field bottom sits at most ~215px from
+  // the viewport top (shell chrome + page heading + field, at scroll 0), so
+  // capping at 100vh − 240px always leaves the panel fully visible; longer
+  // result lists scroll internally instead.
+  max-height: calc(100vh - 240px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  // Custom scroll container — DS scrollbar styling isn't inherited; style it
+  // explicitly with the DS scroll token.
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-scroll) transparent;
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-surface-scroll);
+    border-radius: var(--radius-full);
+  }
+
+  // ds-menu is a flex column: with the max-height cap its children compress
+  // to fit instead of overflowing — rows squash/overlap and no scrollbar ever
+  // appears. Rows keep their natural height; the list scrolls instead.
+  > * { flex-shrink: 0; }
+}
+
+// Result rows are router links, not buttons — strip anchor styling — and
+// carry a two-line body (name + meta), so let the fixed item height grow.
+.user-search__menu .ds-menu__item {
+  text-decoration: none;
+  color: inherit;
+  height: auto;
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+}
+
+.user-search__item-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+// Name line inherits the ds-menu__item typography; only the meta line is styled.
+.user-search__item-name,
+.user-search__item-meta {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-search__item-meta {
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+}
+
+.user-search__empty,
+.user-search__more {
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+// Pinned above the scrolling results so it stays visible while the list
+// scrolls (same pattern as the DS menu's sticky search). Background matches
+// the ds-menu panel surface so rows passing beneath are covered.
+.user-search__more {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface-page);
+
+  // Scrolling rows paint through the ds-menu panel's internal top padding,
+  // peeking out in the strip above the stuck hint. Extend a same-surface
+  // cover over it (overshoot past the padding is clipped by the panel).
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(-1 * var(--spacing-sm));
+    left: 0;
+    right: 0;
+    height: var(--spacing-sm);
+    background: var(--color-surface-page);
+  }
+}
+
+// ── Section toolbar (heading + live count + section filter on one row) ──────
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+
+  .ds-form-section-title { margin: 0; }
+}
+
+.section-toolbar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.section-toolbar__count {
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.section-filter {
+  width: 280px;
+}
+
+// Empty result line when a section filter matches nothing.
+.section-empty {
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+// ── Users by Grade ──────────────────────────────────────────────────────────
+// A flat "number line" of compact grade tiles (PK → 12).
+.grade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-md) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Tiles are stock ds-card-item (outlined + interactive), so surface, border,
+// hover, and focus all come from the DS — these overrides reshape the compact
+// 56px row into a taller centered tile and lift it on hover only.
+.grade-tile {
+  height: auto;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-sm);
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover { box-shadow: var(--shadow-elevation-1); }
+  // Keep the DS focus ring in charge when a focused tile is also hovered.
+  &:focus-visible { box-shadow: 0 0 0 3px var(--color-border-ada-focus-ring); }
+}
+
+.grade-tile .ds-card-item__body {
+  align-items: center;
+}
+
+// Keep the big "number line" label instead of the stock primary-text size.
+.grade-tile .ds-card-item__primary {
+  @include ds.type-title-h3;
+}
+
+.grade-tile .ds-card-item__secondary {
+  white-space: nowrap;
+}
+
+// ── Users by Location ───────────────────────────────────────────────────────
+// Wrapper around the grid / empty line; owns the top offset, and its inline
+// min-height (measured from the unfiltered grid) keeps the page height stable
+// while the section filter narrows the list.
+.location-results {
+  margin-top: var(--spacing-md);
+}
+
+// Compact card-item rows per building, two-up on wide screens.
+.location-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--spacing-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  > li { min-width: 0; }
+}
+
+.location-grid .ds-card-item {
+  // Stock ds-card-item has no vertical padding; the two-line body needs some.
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  // Rows are anchors (navigate to the building page) — strip link styling.
+  text-decoration: none;
+  color: inherit;
+}
+
+// With no leading slot (and its padding) the body starts at the card edge —
+// give the text its own inset.
+.location-grid .ds-card-item__body {
+  padding-left: var(--spacing-md);
+}
+
+.location-grid .ds-card-item__trailing {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md);
+}
+
+.location-count {
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+// ── Responsive grid of role cards (Section 1) ───────────────────────────────
 .user-roles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -48,9 +277,9 @@
   .ds-icon { color: inherit; }
 }
 
-.role-icon--blue   { background: var(--color-surface-accent-blue);   color: var(--color-icon-accent-blue); }
-.role-icon--teal   { background: var(--color-surface-accent-teal);   color: var(--color-icon-accent-teal); }
-.role-icon--purple { background: var(--color-surface-accent-purple); color: var(--color-icon-accent-purple); }
-.role-icon--orange { background: var(--color-surface-accent-orange); color: var(--color-icon-accent-orange); }
-.role-icon--green  { background: var(--color-surface-accent-green);  color: var(--color-icon-accent-green); }
-.role-icon--pink   { background: var(--color-surface-accent-pink);   color: var(--color-icon-accent-pink); }
+.role-icon--blue    { background: var(--color-surface-accent-blue);   color: var(--color-icon-accent-blue); }
+.role-icon--teal    { background: var(--color-surface-accent-teal);   color: var(--color-icon-accent-teal); }
+.role-icon--purple  { background: var(--color-surface-accent-purple); color: var(--color-icon-accent-purple); }
+.role-icon--orange  { background: var(--color-surface-accent-orange); color: var(--color-icon-accent-orange); }
+.role-icon--green   { background: var(--color-surface-accent-green);  color: var(--color-icon-accent-green); }
+.role-icon--pink    { background: var(--color-surface-accent-pink);   color: var(--color-icon-accent-pink); }

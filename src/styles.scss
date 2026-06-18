@@ -14,7 +14,7 @@ html, body {
 // (User Explorer › Role › User). Not a DS component yet; token-based stand-in.
 // TODO eng: promote to a real ds-breadcrumb component.
 .breadcrumb {
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 
   &__list {
     @include ds.type-body-small;

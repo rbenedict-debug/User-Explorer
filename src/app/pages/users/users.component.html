@@ -3,6 +3,69 @@
 </div>
 <div class="ds-page-content__main">
 
+  <!-- ── Search ──────────────────────────────────────────────────────────────
+       Typeahead over the filler data: matches groups (roles, grades, locations)
+       and individual users. Selecting a group opens its table page; selecting
+       a user opens their profile page.
+       TODO eng: wire real directory search + full combobox keyboard/ARIA pattern. -->
+  <div class="user-search">
+    <div class="ds-input ds-search" role="search">
+      <div class="ds-input__field">
+        <span class="ds-icon ds-icon--sm ds-input__icon" aria-hidden="true">search</span>
+        <input #searchInput class="ds-input__control" type="search"
+               placeholder="Search users by name, email, or group…"
+               aria-label="Search users by name, email, or group"
+               autocomplete="off" spellcheck="false"
+               (input)="onSearchInput(searchInput.value)"
+               (focus)="searchOpen.set(true)"
+               (keydown.escape)="closeSearch()" />
+        @if (query()) {
+          <button class="ds-input__action" type="button" aria-label="Clear search"
+                  (click)="clearSearch(searchInput)">
+            <span class="ds-icon ds-icon--sm" aria-hidden="true">close</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (panelOpen()) {
+      <div class="ds-menu user-search__menu" role="menu" aria-label="Search results">
+        @if (manyResults()) {
+          <p class="user-search__more">Keep typing to narrow the results.</p>
+        }
+        @if (groupResults().length) {
+          <div class="ds-menu__section-label">Groups</div>
+          @for (group of groupResults(); track group.slug) {
+            <a class="ds-menu__item ds-menu__item--indent" role="menuitem"
+               [routerLink]="groupLink(group)">
+              <span class="ds-icon ds-icon--sm ds-icon--filled ds-menu__item-icon" aria-hidden="true">{{ group.icon }}</span>
+              <span class="user-search__item-body">
+                <span class="user-search__item-name">{{ group.name }}</span>
+                <span class="user-search__item-meta">{{ group.kind }} · {{ group.count }}</span>
+              </span>
+            </a>
+          }
+        }
+        @if (userResults().length) {
+          <div class="ds-menu__section-label">Users</div>
+          @for (user of userResults(); track user.id) {
+            <a class="ds-menu__item ds-menu__item--indent" role="menuitem"
+               [routerLink]="userLink(user)">
+              <span class="ds-icon ds-icon--sm ds-icon--filled ds-menu__item-icon" aria-hidden="true">person</span>
+              <span class="user-search__item-body">
+                <span class="user-search__item-name">{{ user.name }}</span>
+                <span class="user-search__item-meta">{{ roleName(user) }} · {{ user.location }}</span>
+              </span>
+            </a>
+          }
+        }
+        @if (!groupResults().length && !userResults().length) {
+          <p class="user-search__empty">No matches for “{{ query() }}”. Try a name, email, role, grade, or building.</p>
+        }
+      </div>
+    }
+  </div>
+
   <!-- ── Section 1 · Users by Role ───────────────────────────────────────────
        Filler role names and user counts — placeholder, to be refined.
        Each card opens that role's child page (users/:role). -->
@@ -11,7 +74,7 @@
 
     <div class="user-roles-grid">
       @for (role of roles; track role.slug) {
-        <a class="ds-card-item ds-card-item--interactive" [routerLink]="['/users', role.slug]">
+        <a class="ds-card-item ds-card-item--interactive" [routerLink]="['/users', 'role', role.slug]">
           <div class="ds-card-item__leading">
             <span [class]="'role-icon role-icon--' + role.color">
               <span class="ds-icon ds-icon--filled" aria-hidden="true">{{ role.icon }}</span>
@@ -25,6 +88,91 @@
             <span class="ds-icon ds-icon--sm" aria-hidden="true">chevron_right</span>
           </div>
         </a>
+      }
+    </div>
+  </section>
+
+  <!-- ── Section 2 · Users by Grade ──────────────────────────────────────────
+       Flat, canonical grade order (PK → 12) — no school-level banding, since
+       how a district splits grades varies. The ordinal "number line" itself is
+       what makes the section scannable. Each tile opens users/:grade. -->
+  <section class="user-explorer-section" aria-labelledby="users-by-grade-title">
+    <h2 class="ds-form-section-title" id="users-by-grade-title">Users by Grade</h2>
+
+    <ul class="grade-grid" role="list">
+      @for (grade of grades; track grade.slug) {
+        <li>
+          <a class="ds-card-item ds-card-item--interactive ds-card-item--no-leading ds-card-item--no-trailing grade-tile"
+             [routerLink]="['/users', 'grade', grade.slug]"
+             [attr.aria-label]="grade.name + ' — ' + grade.count">
+            <div class="ds-card-item__body" aria-hidden="true">
+              <span class="ds-card-item__primary">{{ grade.tile }}</span>
+              <span class="ds-card-item__secondary">{{ grade.count }}</span>
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- ── Section 3 · Users by Location ───────────────────────────────────────
+       Flat alphabetical building list (the system has no building-type
+       metadata). For longer districts the section filter narrows by name or
+       address; the live count is announced politely. Rows open users/:location. -->
+  <section class="user-explorer-section" aria-labelledby="users-by-location-title">
+    <div class="section-toolbar">
+      <h2 class="ds-form-section-title" id="users-by-location-title">Users by Location</h2>
+      <div class="section-toolbar__controls">
+        <span class="section-toolbar__count" aria-live="polite">
+          @if (locationFilter().trim()) {
+            {{ filteredLocations().length }} of {{ totalLocations }} buildings
+          } @else {
+            {{ totalLocations }} buildings
+          }
+        </span>
+        <div class="ds-input ds-search section-filter" role="search">
+          <div class="ds-input__field">
+            <span class="ds-icon ds-icon--sm ds-input__icon" aria-hidden="true">search</span>
+            <input #locationInput class="ds-input__control" type="search"
+                   placeholder="Filter buildings…"
+                   aria-label="Filter buildings by name or address"
+                   aria-controls="locations-list"
+                   autocomplete="off" spellcheck="false"
+                   (input)="locationFilter.set(locationInput.value)"
+                   (keydown.escape)="clearLocationFilter(locationInput)" />
+            @if (locationFilter()) {
+              <button class="ds-input__action" type="button" aria-label="Clear building filter"
+                      (click)="clearLocationFilter(locationInput)">
+                <span class="ds-icon ds-icon--sm" aria-hidden="true">close</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- min-height holds the unfiltered list height so filtering doesn't
+         shrink the page and yank the scroll position around. -->
+    <div class="location-results" [style.min-height.px]="locationResultsMinHeight() || null">
+      @if (filteredLocations().length) {
+        <ul class="location-grid" #locationsGrid role="list" id="locations-list">
+          @for (location of filteredLocations(); track location.slug) {
+            <li>
+              <a class="ds-card-item ds-card-item--interactive" [routerLink]="['/users', 'location', location.slug]">
+                <div class="ds-card-item__body">
+                  <span class="ds-card-item__primary">{{ location.name }}</span>
+                  <span class="ds-card-item__secondary">{{ location.address }}</span>
+                </div>
+                <div class="ds-card-item__trailing">
+                  <span class="location-count">{{ location.count }}</span>
+                  <span class="ds-icon ds-icon--sm" aria-hidden="true">chevron_right</span>
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="section-empty">No buildings match “{{ locationFilter() }}”.</p>
       }
     </div>
   </section>

@@ -1,0 +1,18 @@
+// The table page uses .ds-page-content__main--table, which manages its own
+// full-height layout + padding (from onflo + table-sim CSS) — don't add padding here.
+
+// No CTA in the toolbar — let the search field fill the freed-up space,
+// keeping the filter / column / download buttons on the right.
+.ds-table-toolbar__right {
+  flex: 1;
+}
+.ds-table-toolbar__right .ds-search {
+  flex: 1 1 auto;
+  max-width: none;
+}
+
+// Rows open the user page on click. table-init.js re-renders rows via innerHTML
+// (stripping Angular's encapsulation attribute), so pierce encapsulation to style them.
+:host ::ng-deep .ds-table tbody tr {
+  cursor: pointer;
+}

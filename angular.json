@@ -67,6 +67,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "open": true
+          },
           "configurations": {
             "production": {
               "buildTarget": "Onflo-Project-Template:build:production"

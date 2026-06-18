@@ -1,9 +1,277 @@
-// Match the User Explorer page: 24px padding inside the content card.
-.ds-page-content__main {
-  padding: var(--spacing-xl);
+@use '@onflo/design-system/tokens/scss' as ds;
+
+/* Two-column profile layout, placed like ds-split-page (sibling of the page
+   heading). A custom grid is used instead of ds-split-page so the whole page
+   scrolls as one and each column stacks independent section cards.
+   flex: 1 + overflow-y: auto makes this the scroll boundary, mirroring
+   ds-page-content__main (the heading above stays fixed). */
+.user-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  gap: var(--spacing-lg);
+  align-items: start;
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  /* Custom scroll boundary (not a DS scroll container), so style its scrollbar
+     explicitly with the DS scroll token instead of relying on the DS's inherited
+     scrollbar-color (which changed in the v0.7.0 color refactor). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-scroll) transparent;
+
+  /* Elevated-card shadows get clipped at the scroll edges. Pad the scrollport
+     so the shadows have room, then cancel the horizontal padding with a
+     negative inline margin so cards stay aligned with the heading — the same
+     negative-margin compensation the DS dashboard canvas uses. */
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-lg);
+  margin-inline: calc(-1 * var(--spacing-md));
+
+  /* Safari / older Chromium fall back to the webkit pseudo-elements */
+  &::-webkit-scrollbar { width: 8px; height: 8px; }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-surface-scroll);
+    border-radius: var(--radius-full);
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
 }
 
-.user-detail__placeholder {
+.user-detail__main,
+.user-detail__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+
+  > .ds-card { width: 100%; }
+}
+
+/* Profile hero */
+.user-detail__hero {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.user-detail__hero-id {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.user-detail__hero-name {
   margin: 0;
+  @include ds.type-title-h3;
+  color: var(--color-text-primary);
+}
+
+/* Section heads */
+.user-detail__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.user-detail__section-title {
+  margin: 0;
+  @include ds.type-title-h4;
+  color: var(--color-text-primary);
+}
+
+/* Basic information grid */
+.user-detail__info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.user-detail__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+/* Row lists (assets, recent tickets) */
+.user-detail__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Inset card-item leading/trailing slots from the card edge (ds-card-item
+   slots are edge-flush by default). */
+.user-detail__row-inset {
+  padding-inline: var(--spacing-md);
+}
+
+/* Ticket stats */
+.user-detail__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-md);
+
+  .ds-metric-card { width: 100%; }
+}
+
+/* Ticket-status cards: outlined (no elevation) with a status-matched surface +
+   border. Tones reuse the same tokens as the ds-label pills — blue/orange from
+   the accent family, grey matching ds-label--grey (surface-secondary / border-
+   primary), not the disabled grey. */
+.user-detail__stat-card {
+  box-shadow: none;
+  border: 1px solid var(--stat-border);
+  background-color: var(--stat-surface);
+
+  .ds-metric-card__header .ds-icon { color: var(--stat-icon); }
+}
+
+.user-detail__stat-card--blue {
+  --stat-surface: var(--color-surface-accent-blue);
+  --stat-border: var(--color-border-accent-blue);
+  --stat-icon: var(--color-icon-accent-blue);
+}
+
+.user-detail__stat-card--orange {
+  --stat-surface: var(--color-surface-accent-orange);
+  --stat-border: var(--color-border-accent-orange);
+  --stat-icon: var(--color-icon-accent-orange);
+}
+
+.user-detail__stat-card--grey {
+  --stat-surface: var(--color-surface-secondary);
+  --stat-border: var(--color-border-primary);
+  --stat-icon: var(--color-icon-subtle);
+}
+
+.user-detail__divider { margin: var(--spacing-lg) 0; }
+
+/* Shared text treatments — grouped so each type style compiles once */
+.user-detail__hero-sub {
+  margin: 0;
+  @include ds.type-body-medium;
   color: var(--color-text-secondary);
+}
+
+.user-detail__info-value,
+.user-detail__note-text,
+.user-detail__linked-name,
+.user-detail__linked-field-value {
+  @include ds.type-body-medium;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.user-detail__info-label,
+.user-detail__list-label,
+.user-detail__note-author,
+.user-detail__note-time,
+.user-detail__linked-field-label {
+  @include ds.type-label-small;
+  color: var(--color-text-secondary);
+}
+
+.user-detail__list-label { margin: 0 0 var(--spacing-sm); }
+
+.user-detail__row-icon {
+  flex: none;
+  color: var(--color-text-secondary);
+}
+
+/* Notes — composer + author-attributed note feed */
+.user-detail__note-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+
+  .ds-textarea { width: 100%; }
+}
+
+.user-detail__note-composer-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.user-detail__notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.user-detail__note {
+  display: flex;
+  gap: var(--spacing-sm);
+
+  .ds-avatar { flex: none; }
+}
+
+.user-detail__note-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.user-detail__note-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+/* author overrides the shared label-small secondary color (declared after it) */
+.user-detail__note-author { color: var(--color-text-primary); }
+.user-detail__note-time { flex: none; }
+.user-detail__note-text { margin: 0; }
+
+/* Linked relationships (guardians / students) — one card of connected-user sub-cards */
+.user-detail__linked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.user-detail__linked-item {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+
+  .ds-avatar { flex: none; }
+}
+
+.user-detail__linked-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  flex: 1;
+}
+
+.user-detail__linked-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+/* prominent weight on top of the shared body-medium type (declared after it) */
+.user-detail__linked-name { font-weight: var(--ref-typescale-body-medium-weight-prominent); }
+
+.user-detail__linked-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm) var(--spacing-md);
+}
+
+.user-detail__linked-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
 }

@@ -1,3 +1,11 @@
+// Subnav width — widened from the 195px DS default to 205px via the design system's
+// --subnav-width layout token. The subnav is a single shared shell element that only
+// renders on Tickets, Assets, Analytics and Settings (the User Explorer page hides it),
+// so this applies to exactly those pages.
+.ds-page-layout {
+  --subnav-width: 205px;
+}
+
 .settings-subnav {
   flex: 1 1 0;
   min-height: 0;
@@ -48,7 +56,7 @@
 .ds-page-layout .ds-nav-expand {
   position: absolute;
   top: 87px;
-  left: 270px;
+  left: 280px; // tracks the subnav's right edge: +10px to match the 195px → 205px widen
   z-index: 10;
   transition: left .2s ease;
 }
