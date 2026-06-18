@@ -161,8 +161,11 @@
 }
 
 // Tiles are stock ds-card-item (outlined + interactive), so surface, border,
-// hover, and focus all come from the DS — these overrides reshape the compact
-// 56px row into a taller centered tile and lift it on hover only.
+// hover lift, and focus ring all come from the DS — these overrides only
+// reshape the compact 56px row into a taller centered tile. Hover and focus are
+// left to ds-card-item--interactive so the elevation matches the role and
+// location cards exactly; a local box-shadow override here would have higher
+// specificity than the DS rule and suppress (flatten) its hover lift.
 .grade-tile {
   height: auto;
   justify-content: center;
@@ -170,10 +173,6 @@
   text-align: center;
   text-decoration: none;
   color: inherit;
-
-  &:hover { box-shadow: var(--shadow-elevation-1); }
-  // Keep the DS focus ring in charge when a focused tile is also hovered.
-  &:focus-visible { box-shadow: 0 0 0 3px var(--color-border-ada-focus-ring); }
 }
 
 .grade-tile .ds-card-item__body {
