@@ -19,188 +19,202 @@
       </li>
     </ol>
   </nav>
-  <h1 class="ds-page-content__title">{{ user()?.name ?? 'User' }}</h1>
+  <!-- Title duplicates the hero name (and the breadcrumb's current item), so it's
+       screen-reader-only. The DS requires every page to keep an h1 — hide it with
+       ds-sr-only, never omit it. -->
+  <h1 class="ds-page-content__title ds-sr-only">{{ user()?.name ?? 'User' }}</h1>
 </div>
 
-<!-- Modular two-column profile layout. Each section is its own card so they can
+<!-- Modular profile layout: a full-width profile header card above a two-column
+     split for the remaining sections. Each section is its own card so they can
      be reordered / extracted independently as the page grows. -->
 <div class="user-detail">
 
-  <!-- ── Main column ──────────────────────────────────────────────────────── -->
-  <div class="user-detail__main">
-
-    <!-- Profile + Basic Information -->
-    <section class="ds-card ds-card--elevated" aria-label="Profile and basic information">
-      <div class="ds-card__body">
-        <div class="user-detail__hero">
-          <div class="ds-avatar ds-avatar--xl">
-            <span class="ds-avatar__initials">{{ initials() || '—' }}</span>
-          </div>
-          <div class="user-detail__hero-id">
-            <p class="user-detail__hero-name">{{ user()?.name ?? 'Unknown user' }}</p>
-            <p class="user-detail__hero-sub">{{ userRoleName() || 'Role' }} · {{ user()?.location ?? '—' }}</p>
-          </div>
+  <!-- ── Profile + Basic Information — full-width, above the split ──────────── -->
+  <section class="ds-card ds-card--elevated" aria-label="Profile and basic information">
+    <div class="ds-card__body">
+      <div class="user-detail__hero">
+        <div class="ds-avatar ds-avatar--xl">
+          <span class="ds-avatar__initials">{{ initials() || '—' }}</span>
         </div>
-        <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
-        <div class="user-detail__info">
-          @for (field of basicInfo(); track field.label) {
-            <div class="user-detail__info-item">
-              <span class="user-detail__info-label">{{ field.label }}</span>
-              <span class="user-detail__info-value">{{ field.value }}</span>
-            </div>
-          }
+        <div class="user-detail__hero-id">
+          <p class="user-detail__hero-name">{{ user()?.name ?? 'Unknown user' }}</p>
+          <p class="user-detail__hero-sub">{{ userRoleName() || 'Role' }} · {{ user()?.location ?? '—' }}</p>
         </div>
       </div>
-      <!-- TODO eng: wire real user fields. -->
-    </section>
+      <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
+      <div class="user-detail__info">
+        @for (field of basicInfo(); track field.label) {
+          <div class="user-detail__info-item">
+            <span class="user-detail__info-label">{{ field.label }}</span>
+            <div class="user-detail__info-values">
+              @for (v of fieldValues(field); track v) {
+                <span class="user-detail__info-value">{{ v }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+    <!-- TODO eng: wire real user fields. -->
+  </section>
 
-    <!-- Linked relationships: guardians for students, linked students for parents/staff -->
-    @if (linkedSection(); as linked) {
-      <section class="ds-card ds-card--elevated" aria-labelledby="ud-linked-title">
+  <!-- ── Remaining sections in a two-column split ──────────────────────────── -->
+  <div class="user-detail__split">
+
+    <!-- ── Main column ─────────────────────────────────────────────────────── -->
+    <div class="user-detail__main">
+
+      <!-- Linked relationships: guardians for students, linked students for parents/staff -->
+      @if (linkedSection(); as linked) {
+        <section class="ds-card ds-card--elevated" aria-labelledby="ud-linked-title">
+          <div class="ds-card__body">
+            <div class="user-detail__section-head user-detail__section-head--count">
+              <h2 class="user-detail__section-title" id="ud-linked-title">{{ linked.title }}</h2>
+              <span class="ds-badge-indicator ds-badge-indicator--blue" aria-hidden="true">{{ linked.people.length }}</span>
+            </div>
+            <div class="user-detail__linked">
+              @for (person of linked.people; track person.name) {
+                <div class="user-detail__linked-item">
+                  <div class="ds-avatar ds-avatar--sm"><span class="ds-avatar__initials">{{ person.initials }}</span></div>
+                  <div class="user-detail__linked-body">
+                    <div class="user-detail__linked-head">
+                      <span class="user-detail__linked-name">{{ person.name }}</span>
+                      <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ linked.badgeColor }}">{{ person.badge }}</span>
+                    </div>
+                    <div class="user-detail__linked-fields">
+                      @for (f of person.fields; track f.label) {
+                        <div class="user-detail__linked-field">
+                          <span class="user-detail__linked-field-label">{{ f.label }}</span>
+                          <span class="user-detail__linked-field-value">{{ f.value }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+          <!-- TODO eng: load real guardian / student links for this user. -->
+        </section>
+      }
+
+      <!-- Tickets Summary -->
+      <section class="ds-card ds-card--elevated" aria-labelledby="ud-tickets-title">
         <div class="ds-card__body">
           <div class="user-detail__section-head">
-            <h2 class="user-detail__section-title" id="ud-linked-title">{{ linked.title }}</h2>
-            <span class="ds-label ds-label--pill ds-label--xs ds-label--grey">{{ linked.people.length }}</span>
+            <h2 class="user-detail__section-title" id="ud-tickets-title">Tickets Summary</h2>
+            <button class="ds-button ds-button--text ds-button--sm" type="button">View all</button>
           </div>
-          <div class="user-detail__linked">
-            @for (person of linked.people; track person.name) {
-              <div class="user-detail__linked-item">
-                <div class="ds-avatar ds-avatar--sm"><span class="ds-avatar__initials">{{ person.initials }}</span></div>
-                <div class="user-detail__linked-body">
-                  <div class="user-detail__linked-head">
-                    <span class="user-detail__linked-name">{{ person.name }}</span>
-                    <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ linked.badgeColor }}">{{ person.badge }}</span>
-                  </div>
-                  <div class="user-detail__linked-fields">
-                    @for (f of person.fields; track f.label) {
-                      <div class="user-detail__linked-field">
-                        <span class="user-detail__linked-field-label">{{ f.label }}</span>
-                        <span class="user-detail__linked-field-value">{{ f.value }}</span>
-                      </div>
-                    }
-                  </div>
+          <div class="user-detail__stats">
+            @for (stat of ticketStats; track stat.label) {
+              <div class="ds-metric-card user-detail__stat-card user-detail__stat-card--{{ stat.tone }}">
+                <div class="ds-metric-card__header">
+                  <span class="ds-metric-card__label">{{ stat.label }}</span>
+                  <span class="ds-icon ds-icon--sm ds-icon--filled" aria-hidden="true">{{ stat.icon }}</span>
+                </div>
+                <div class="ds-metric-card__value">{{ stat.value }}</div>
+              </div>
+            }
+          </div>
+          <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
+          <p class="user-detail__list-label">Recent activity</p>
+          <div class="user-detail__list">
+            @for (ticket of recentTickets; track ticket.subject) {
+              <div class="ds-card-item">
+                <div class="ds-card-item__leading user-detail__row-inset">
+                  <span class="ds-icon user-detail__row-icon" aria-hidden="true">confirmation_number</span>
+                </div>
+                <div class="ds-card-item__body">
+                  <span class="ds-card-item__primary">{{ ticket.subject }}</span>
+                  <span class="ds-card-item__secondary">{{ ticket.date }}</span>
+                </div>
+                <div class="ds-card-item__trailing user-detail__row-inset">
+                  <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ ticket.color }}">{{ ticket.status }}</span>
                 </div>
               </div>
             }
           </div>
         </div>
-        <!-- TODO eng: load real guardian / student links for this user. -->
+        <!-- TODO eng: wire real ticket aggregates + recent activity. -->
       </section>
-    }
 
-    <!-- Tickets Summary -->
-    <section class="ds-card ds-card--elevated" aria-labelledby="ud-tickets-title">
-      <div class="ds-card__body">
-        <div class="user-detail__section-head">
-          <h2 class="user-detail__section-title" id="ud-tickets-title">Tickets Summary</h2>
-          <button class="ds-button ds-button--text ds-button--sm" type="button">View all</button>
-        </div>
-        <div class="user-detail__stats">
-          @for (stat of ticketStats; track stat.label) {
-            <div class="ds-metric-card user-detail__stat-card user-detail__stat-card--{{ stat.tone }}">
-              <div class="ds-metric-card__header">
-                <span class="ds-metric-card__label">{{ stat.label }}</span>
-                <span class="ds-icon ds-icon--sm ds-icon--filled" aria-hidden="true">{{ stat.icon }}</span>
-              </div>
-              <div class="ds-metric-card__value">{{ stat.value }}</div>
-            </div>
-          }
-        </div>
-        <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
-        <p class="user-detail__list-label">Recent activity</p>
-        <div class="user-detail__list">
-          @for (ticket of recentTickets; track ticket.subject) {
-            <div class="ds-card-item">
-              <div class="ds-card-item__leading user-detail__row-inset">
-                <span class="ds-icon user-detail__row-icon" aria-hidden="true">confirmation_number</span>
-              </div>
-              <div class="ds-card-item__body">
-                <span class="ds-card-item__primary">{{ ticket.subject }}</span>
-                <span class="ds-card-item__secondary">{{ ticket.date }}</span>
-              </div>
-              <div class="ds-card-item__trailing user-detail__row-inset">
-                <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ ticket.color }}">{{ ticket.status }}</span>
+    </div>
+
+    <!-- ── Side column ─────────────────────────────────────────────────────── -->
+    <aside class="user-detail__side" aria-label="Notes and assets">
+
+      <!-- Notes -->
+      <section class="ds-card ds-card--elevated" aria-labelledby="ud-notes-title">
+        <div class="ds-card__body">
+          <div class="user-detail__section-head user-detail__section-head--count">
+            <h2 class="user-detail__section-title" id="ud-notes-title">Notes</h2>
+            <span class="ds-badge-indicator ds-badge-indicator--blue" aria-hidden="true">{{ notes().length }}</span>
+          </div>
+
+          <!-- Composer (local-only in design mode) -->
+          <div class="user-detail__note-composer">
+            <div class="ds-textarea">
+              <div class="ds-textarea__field">
+                <textarea #noteInput class="ds-textarea__control" rows="3"
+                          placeholder="Write a note about this user..."
+                          aria-label="Add a note about this user"></textarea>
+                <div class="ds-textarea__resize-handle" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M9 3L3 9M9 7L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
               </div>
             </div>
-          }
+            <div class="user-detail__note-composer-actions">
+              <button class="ds-button ds-button--filled ds-button--sm" type="button"
+                      (click)="addNote(noteInput.value); noteInput.value = ''">Add note</button>
+            </div>
+          </div>
+
+          <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
+
+          <div class="user-detail__notes">
+            @for (note of notes(); track note) {
+              <div class="user-detail__note">
+                <div class="ds-avatar ds-avatar--sm"><span class="ds-avatar__initials">{{ note.initials }}</span></div>
+                <div class="user-detail__note-body">
+                  <div class="user-detail__note-head">
+                    <span class="user-detail__note-author">{{ note.author }}</span>
+                    <span class="user-detail__note-time">{{ note.timestamp }}</span>
+                  </div>
+                  <p class="user-detail__note-text">{{ note.body }}</p>
+                </div>
+              </div>
+            }
+          </div>
         </div>
-      </div>
-      <!-- TODO eng: wire real ticket aggregates + recent activity. -->
-    </section>
+        <!-- TODO eng: persist notes (create + load) for this user. -->
+      </section>
+
+      <!-- Assigned assets -->
+      <section class="ds-card ds-card--elevated" aria-labelledby="ud-assets-title">
+        <div class="ds-card__body">
+          <div class="user-detail__section-head user-detail__section-head--count">
+            <h2 class="user-detail__section-title" id="ud-assets-title">Assets</h2>
+            <span class="ds-badge-indicator ds-badge-indicator--blue" aria-hidden="true">{{ assets.length }}</span>
+          </div>
+          <div class="user-detail__list">
+            @for (asset of assets; track asset.tag) {
+              <div class="ds-card-item ds-card-item--no-leading">
+                <div class="ds-card-item__body">
+                  <span class="ds-card-item__primary">{{ asset.name }}</span>
+                  <span class="ds-card-item__secondary">Asset #{{ asset.tag }}</span>
+                </div>
+                <div class="ds-card-item__trailing user-detail__row-inset">
+                  <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ asset.color }}">{{ asset.status }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <!-- TODO eng: wire real asset assignments. -->
+      </section>
+
+    </aside>
 
   </div>
-
-  <!-- ── Side column ──────────────────────────────────────────────────────── -->
-  <aside class="user-detail__side" aria-label="Notes and assets">
-
-    <!-- Notes -->
-    <section class="ds-card ds-card--elevated" aria-labelledby="ud-notes-title">
-      <div class="ds-card__body">
-        <div class="user-detail__section-head">
-          <h2 class="user-detail__section-title" id="ud-notes-title">Notes</h2>
-          <span class="ds-label ds-label--pill ds-label--xs ds-label--grey">{{ notes().length }}</span>
-        </div>
-
-        <!-- Composer (local-only in design mode) -->
-        <div class="user-detail__note-composer">
-          <div class="ds-textarea">
-            <div class="ds-textarea__field">
-              <textarea #noteInput class="ds-textarea__control" rows="3"
-                        placeholder="Write a note about this user..."
-                        aria-label="Add a note about this user"></textarea>
-              <div class="ds-textarea__resize-handle" aria-hidden="true">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M9 3L3 9M9 7L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-            </div>
-          </div>
-          <div class="user-detail__note-composer-actions">
-            <button class="ds-button ds-button--filled ds-button--sm" type="button"
-                    (click)="addNote(noteInput.value); noteInput.value = ''">Add note</button>
-          </div>
-        </div>
-
-        <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
-
-        <div class="user-detail__notes">
-          @for (note of notes(); track note) {
-            <div class="user-detail__note">
-              <div class="ds-avatar ds-avatar--sm"><span class="ds-avatar__initials">{{ note.initials }}</span></div>
-              <div class="user-detail__note-body">
-                <div class="user-detail__note-head">
-                  <span class="user-detail__note-author">{{ note.author }}</span>
-                  <span class="user-detail__note-time">{{ note.timestamp }}</span>
-                </div>
-                <p class="user-detail__note-text">{{ note.body }}</p>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-      <!-- TODO eng: persist notes (create + load) for this user. -->
-    </section>
-
-    <!-- Assigned assets -->
-    <section class="ds-card ds-card--elevated" aria-labelledby="ud-assets-title">
-      <div class="ds-card__body">
-        <div class="user-detail__section-head">
-          <h2 class="user-detail__section-title" id="ud-assets-title">Assets</h2>
-          <span class="ds-label ds-label--pill ds-label--xs ds-label--grey">{{ assets.length }} assigned</span>
-        </div>
-        <div class="user-detail__list">
-          @for (asset of assets; track asset.tag) {
-            <div class="ds-card-item ds-card-item--no-leading">
-              <div class="ds-card-item__body">
-                <span class="ds-card-item__primary">{{ asset.name }}</span>
-                <span class="ds-card-item__secondary">Asset #{{ asset.tag }}</span>
-              </div>
-              <div class="ds-card-item__trailing user-detail__row-inset">
-                <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ asset.color }}">{{ asset.status }}</span>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-      <!-- TODO eng: wire real asset assignments. -->
-    </section>
-  </aside>
 </div>

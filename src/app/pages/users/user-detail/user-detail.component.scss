@@ -1,15 +1,14 @@
 @use '@onflo/design-system/tokens/scss' as ds;
 
-/* Two-column profile layout, placed like ds-split-page (sibling of the page
-   heading). A custom grid is used instead of ds-split-page so the whole page
-   scrolls as one and each column stacks independent section cards.
-   flex: 1 + overflow-y: auto makes this the scroll boundary, mirroring
-   ds-page-content__main (the heading above stays fixed). */
+/* Profile layout: a full-width profile header card stacked above a two-column
+   split (.user-detail__split) for the remaining sections, placed like
+   ds-split-page (sibling of the page heading). This outer element is a flex
+   column so the whole page scrolls as one; flex: 1 + overflow-y: auto makes it
+   the scroll boundary, mirroring ds-page-content__main (the heading stays fixed). */
 .user-detail {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-lg);
-  align-items: start;
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
@@ -35,6 +34,22 @@
     border-radius: var(--radius-full);
   }
   &::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* Keep the profile card and the split at their natural height — let .user-detail
+   scroll instead. Without this, flex-shrink (default 1) lets the height-constrained
+   scroll column collapse the cards (ds-card clips overflow, so their min-height
+   resolves to 0), squashing the hero to ~1px. */
+.user-detail > * {
+  flex-shrink: 0;
+}
+
+/* Two-column split for the sections below the full-width profile header. */
+.user-detail__split {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  gap: var(--spacing-lg);
+  align-items: start;
 }
 
 .user-detail__main,
@@ -76,20 +91,37 @@
   margin-bottom: var(--spacing-lg);
 }
 
+/* Count-badge heads (Linked / Notes / Assets): tuck the count pill right after
+   the title instead of pushing it to the far edge. The Tickets head keeps the
+   base space-between for its right-aligned "View all" action. */
+.user-detail__section-head--count {
+  justify-content: flex-start;
+  gap: var(--spacing-sm);
+}
+
 .user-detail__section-title {
   margin: 0;
   @include ds.type-title-h4;
   color: var(--color-text-primary);
 }
 
-/* Basic information grid */
+/* Basic information grid. Auto-flowing columns so the now full-width profile
+   card fills out to ~4 columns instead of looking sparse at two. */
 .user-detail__info {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-lg);
 }
 
 .user-detail__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+/* Stack of values under one label — e.g. a guardian's multiple emails / phones. */
+.user-detail__info-values {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);

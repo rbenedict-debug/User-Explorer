@@ -7,7 +7,9 @@ import { UserRow, findUserById, roleLabel } from '../users.data';
 
 // Each section renders from a small typed model so real data can be swapped in
 // later without touching the template. Filler values are flagged inline.
-interface InfoField { label: string; value: string; }
+// A field holds either a single value or several stacked values (e.g. a guardian
+// with multiple emails / phones).
+interface InfoField { label: string; value: string | string[]; }
 interface AssetRow { icon: string; name: string; tag: string; status: string; color: string; }
 interface TicketStat { icon: string; label: string; value: string; tone: 'blue' | 'orange' | 'grey'; }
 interface RecentTicket { subject: string; status: string; color: string; date: string; }
@@ -66,6 +68,12 @@ export class UserDetailComponent {
     return this.fieldsFor(u.role, u);
   });
 
+  /** Normalize a field's value to a list so the template renders single- and
+   *  multi-value fields (a guardian's several emails / phones) the same way. */
+  fieldValues(field: InfoField): string[] {
+    return Array.isArray(field.value) ? field.value : [field.value];
+  }
+
   private fieldsFor(slug: string, u: UserRow): InfoField[] {
     switch (slug) {
       case 'student':
@@ -123,14 +131,30 @@ export class UserDetailComponent {
           { label: 'Title',          value: 'Field Technician' },
           { label: 'Certifications', value: 'CompTIA A+' },
         ];
-      case 'parent-guardian':
+      case 'parent-guardian': {
         // Parents carry minimal direct details — most of the record is their
-        // linked students (rendered in the Linked Students section below).
+        // linked students (rendered in the Linked Students section below). Contact
+        // info is the exception: some guardians have several emails / phones, so a
+        // couple of examples (par2, par3) show the stacked multi-value layout while
+        // the rest show a single contact each.
+        const surname = u.name.split(' ').filter(Boolean).slice(-1)[0]?.toLowerCase() ?? 'family';
+        if (u.id === 'par2' || u.id === 'par3') {
+          const emails = [u.email, `${surname}.work@example.com`];
+          const phones = u.id === 'par2'
+            ? [u.phone ?? '—', '(555) 119-3380']
+            : [u.phone ?? '—', '(555) 119-3402', '(555) 442-1187'];
+          return [
+            { label: 'Email',             value: emails },
+            { label: 'Phone',             value: phones },
+            { label: 'Preferred Contact', value: 'Email' },
+          ];
+        }
         return [
-          { label: 'Email',      value: u.email },
-          { label: 'Mobile',     value: '(555) 228-4471' },
-          { label: 'Home Phone', value: '(555) 119-3380' },
+          { label: 'Email',             value: u.email },
+          { label: 'Phone',             value: u.phone ?? '(555) 228-4471' },
+          { label: 'Preferred Contact', value: 'Phone' },
         ];
+      }
       default:
         return [
           { label: 'Email',        value: u.email },
