@@ -1,49 +1,43 @@
-# Onflo Project Template
+# User Explorer
 
-Starter template for Onflo design prototypes. Used by designers and PMs to build
-working feature mockups using real Onflo components before engineering handoff.
+A working UI prototype of the **User Explorer** — a directory for browsing a district's
+users (students, parents/guardians, teachers, staff, administrators, technicians) and
+drilling into an individual user's profile.
 
----
+🔗 **Live demo:** https://rbenedict-debug.github.io/User-Explorer/
 
-## Getting started
+Built with the [Onflo Design System](https://github.com/rbenedict-debug/Design-System)
+in **design mode** (the CSS class API only) — a realistic, clickable mockup for
+stakeholder review ahead of engineering handoff. All data is representative filler, and
+spots that need real wiring are flagged inline with `<!-- TODO eng: ... -->`.
 
-### 1. Create your project from this template
+## What's in it
 
-Click **"Use this template"** at the top of this GitHub page and give your project a name.
-Then clone your new repo locally.
+- **User Explorer landing** — browse users by role, grade, or location.
+- **Drill-down tables** — a per-role / grade / location list for each group.
+- **User profile** — hero + basic info, linked relationships (guardians ↔ students),
+  a tickets summary, assigned assets, and notes.
+  - Linked guardian/student cards **navigate to that person's real profile**.
+  - "View all", recent-activity, and asset cards open a design-mode **intent popup**
+    describing where they'd go, since those destinations aren't built in the prototype.
 
-### 2. Open in Claude Code
+## Run locally
 
-Open the project folder in Claude Code. Claude will read the project setup automatically.
+Requires **Node 22+**.
 
-If `node_modules/` doesn't exist yet, Claude will ask you to run `/setup-project` — do that first
-and it will walk you through everything.
+```bash
+npm install   # installs Angular + the Onflo Design System (a public git dependency)
+npm start     # ng serve → http://localhost:4200
+```
 
-### 3. Start building
+> Peer-dependency warnings during install are expected in design mode and safe to ignore.
 
-Tell Claude what you're building. Example:
+## Deployment
 
-> "Build me a page that shows a list of user accounts with a search bar and a way to add new users."
+Pushing to `main` triggers [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml),
+which builds the app and publishes it to GitHub Pages. The live demo updates
+automatically — there is no manual deploy step and no separate `gh-pages` branch.
 
-Claude knows all the Onflo components and will build it using the real design system.
+## Tech
 
----
-
-## Visual reference
-
-Open `node_modules/@onflo/design-system/preview/index.html` in your browser after setup
-to see every available component, layout, and token with live demos.
-
----
-
-## Updating the design system
-
-When Rebecca releases a new DS version, run `/update-design-system` in Claude Code
-and it will handle the update automatically.
-
----
-
-## Handing off to engineering
-
-When the prototype is ready, share this repo with the engineering team. They'll clone it,
-switch to engineering mode in the CLAUDE.md, and wire up the real data and behavior.
+Angular 21 (standalone components) · Onflo Design System (design mode) · GitHub Actions → Pages.
