@@ -1,5 +1,17 @@
 @use '@onflo/design-system/tokens/scss' as ds;
 
+/* No heading→content gap override here: the DS default (--spacing-lg) plus the scroll
+   container's --spacing-xs top padding give 20px below the breadcrumb, which matches the
+   20px above it (ds-page-layout__body top padding --spacing-md + the breadcrumb's
+   --spacing-sm top inset). Even space above and below on this title-less profile page. */
+
+/* Drop the global breadcrumb's bottom margin on this page only — the host gap below the
+   heading now provides the separation. Scoped to the component, so other breadcrumb pages
+   keep the global spacing. */
+.breadcrumb {
+  margin-bottom: 0;
+}
+
 /* Profile layout: a full-width profile header card stacked above a two-column
    split (.user-detail__split) for the remaining sections, placed like
    ds-split-page (sibling of the page heading). This outer element is a flex
@@ -24,7 +36,7 @@
      so the shadows have room, then cancel the horizontal padding with a
      negative inline margin so cards stay aligned with the heading — the same
      negative-margin compensation the DS dashboard canvas uses. */
-  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-xs) var(--spacing-md) var(--spacing-lg);
   margin-inline: calc(-1 * var(--spacing-md));
 
   /* Safari / older Chromium fall back to the webkit pseudo-elements */
@@ -101,7 +113,7 @@
 
 .user-detail__section-title {
   margin: 0;
-  @include ds.type-title-h4;
+  @include ds.type-title-h3;
   color: var(--color-text-primary);
 }
 
@@ -144,16 +156,17 @@
 /* Ticket stats */
 .user-detail__stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--spacing-md);
 
   .ds-metric-card { width: 100%; }
 }
 
 /* Ticket-status cards: outlined (no elevation) with a status-matched surface +
-   border. Tones reuse the same tokens as the ds-label pills — blue/orange from
-   the accent family, grey matching ds-label--grey (surface-secondary / border-
-   primary), not the disabled grey. */
+   border. Tones mirror the inbox status pills — blue (Unopened), orange (In
+   Progress), purple (Pending Details) from the accent family, grey (Closed)
+   matching ds-label--grey (surface-secondary / border-primary), not the
+   disabled grey. */
 .user-detail__stat-card {
   box-shadow: none;
   border: 1px solid var(--stat-border);
@@ -172,6 +185,12 @@
   --stat-surface: var(--color-surface-accent-orange);
   --stat-border: var(--color-border-accent-orange);
   --stat-icon: var(--color-icon-accent-orange);
+}
+
+.user-detail__stat-card--purple {
+  --stat-surface: var(--color-surface-accent-purple);
+  --stat-border: var(--color-border-accent-purple);
+  --stat-icon: var(--color-icon-accent-purple);
 }
 
 .user-detail__stat-card--grey {
@@ -209,11 +228,6 @@
 
 .user-detail__list-label { margin: 0 0 var(--spacing-sm); }
 
-.user-detail__row-icon {
-  flex: none;
-  color: var(--color-text-secondary);
-}
-
 /* Notes — composer + author-attributed note feed */
 .user-detail__note-composer {
   display: flex;
@@ -237,8 +251,19 @@
 .user-detail__note {
   display: flex;
   gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-surface-accent-yellow);
+  border: 1px solid var(--color-border-accent-yellow);
+  border-radius: var(--radius-md);
 
-  .ds-avatar { flex: none; }
+  /* Navy avatar with inverse (light) initials — sets note authors apart from the
+     hero / linked-person avatars, which keep the default tint. */
+  .ds-avatar {
+    flex: none;
+    background-color: var(--color-surface-accent-navy-bold);
+  }
+
+  .ds-avatar__initials { color: var(--color-text-inverse); }
 }
 
 .user-detail__note-body {
@@ -268,11 +293,21 @@
 }
 
 .user-detail__linked-item {
+  /* The element carries `ds-card-item ds-card-item--interactive`, so the DS owns
+     the border, hover border + shadow lift, overlay, and focus ring — identical to
+     the recent-activity rows. We override only the layout to fit the avatar +
+     multi-row body, and keep the anchor's text neutral. */
   display: flex;
+  align-items: flex-start;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+
+  /* Avatar + body sit above the interactive ::after overlay */
+  > .ds-avatar,
+  > .user-detail__linked-body { position: relative; z-index: 1; }
 
   .ds-avatar { flex: none; }
 }
@@ -306,4 +341,20 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   min-width: 0;
+}
+
+/* Navigation-intent dialog (design-mode stand-in for real routing) */
+.user-detail__intent-dialog { width: 420px; }
+
+.user-detail__intent-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-surface-info);
+  border-radius: var(--radius-md);
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+
+  .ds-icon { flex: none; color: var(--color-icon-info); }
 }

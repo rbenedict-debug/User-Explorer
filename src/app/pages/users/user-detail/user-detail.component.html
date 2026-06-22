@@ -74,8 +74,10 @@
               <span class="ds-badge-indicator ds-badge-indicator--blue" aria-hidden="true">{{ linked.people.length }}</span>
             </div>
             <div class="user-detail__linked">
-              @for (person of linked.people; track person.name) {
-                <div class="user-detail__linked-item">
+              @for (person of linked.people; track person.id) {
+                <a class="ds-card-item ds-card-item--interactive user-detail__linked-item"
+                   [routerLink]="['/users', 'role', person.role, person.id]"
+                   [attr.aria-label]="'View profile: ' + person.name">
                   <div class="ds-avatar ds-avatar--sm"><span class="ds-avatar__initials">{{ person.initials }}</span></div>
                   <div class="user-detail__linked-body">
                     <div class="user-detail__linked-head">
@@ -91,7 +93,7 @@
                       }
                     </div>
                   </div>
-                </div>
+                </a>
               }
             </div>
           </div>
@@ -104,7 +106,7 @@
         <div class="ds-card__body">
           <div class="user-detail__section-head">
             <h2 class="user-detail__section-title" id="ud-tickets-title">Tickets Summary</h2>
-            <button class="ds-button ds-button--text ds-button--sm" type="button">View all</button>
+            <button class="ds-button ds-button--text ds-button--sm" type="button" (click)="showAllTicketsIntent()">View all</button>
           </div>
           <div class="user-detail__stats">
             @for (stat of ticketStats; track stat.label) {
@@ -121,16 +123,18 @@
           <p class="user-detail__list-label">Recent activity</p>
           <div class="user-detail__list">
             @for (ticket of recentTickets; track ticket.subject) {
-              <div class="ds-card-item">
-                <div class="ds-card-item__leading user-detail__row-inset">
-                  <span class="ds-icon user-detail__row-icon" aria-hidden="true">confirmation_number</span>
-                </div>
+              <div class="ds-card-item ds-card-item--no-leading ds-card-item--interactive"
+                   role="button" tabindex="0"
+                   [attr.aria-label]="'Open ticket: ' + ticket.subject"
+                   (click)="showTicketIntent(ticket)"
+                   (keydown.enter)="showTicketIntent(ticket)"
+                   (keydown.space)="$event.preventDefault(); showTicketIntent(ticket)">
                 <div class="ds-card-item__body">
                   <span class="ds-card-item__primary">{{ ticket.subject }}</span>
                   <span class="ds-card-item__secondary">{{ ticket.date }}</span>
                 </div>
                 <div class="ds-card-item__trailing user-detail__row-inset">
-                  <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ ticket.color }}">{{ ticket.status }}</span>
+                  <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--has-dot ds-label--{{ ticket.color }}"><span class="ds-label__dot" aria-hidden="true"></span>{{ ticket.status }}</span>
                 </div>
               </div>
             }
@@ -199,7 +203,12 @@
           </div>
           <div class="user-detail__list">
             @for (asset of assets; track asset.tag) {
-              <div class="ds-card-item ds-card-item--no-leading">
+              <div class="ds-card-item ds-card-item--no-leading ds-card-item--interactive"
+                   role="button" tabindex="0"
+                   [attr.aria-label]="'Open asset: ' + asset.name"
+                   (click)="showAssetIntent(asset)"
+                   (keydown.enter)="showAssetIntent(asset)"
+                   (keydown.space)="$event.preventDefault(); showAssetIntent(asset)">
                 <div class="ds-card-item__body">
                   <span class="ds-card-item__primary">{{ asset.name }}</span>
                   <span class="ds-card-item__secondary">Asset #{{ asset.tag }}</span>
@@ -218,3 +227,27 @@
 
   </div>
 </div>
+
+<!-- Navigation-intent popup (design mode): the Inbox / ticket views aren't built
+     in this prototype, so destinations open this dialog describing their intent
+     instead of navigating. -->
+<!-- TODO eng: replace with real navigation + the DS dialog (focus trap, route). -->
+@if (intentDialog(); as info) {
+  <div class="ds-dialog-backdrop" (click)="closeIntentDialog()">
+    <div class="ds-dialog user-detail__intent-dialog" role="dialog" aria-modal="true"
+         aria-labelledby="ud-intent-title" (click)="$event.stopPropagation()">
+      <div class="ds-dialog__body">
+        <h2 class="ds-dialog__title" id="ud-intent-title">{{ info.title }}</h2>
+        <p class="ds-dialog__text">{{ info.body }}</p>
+        <div class="user-detail__intent-note" role="note">
+          <span class="ds-icon ds-icon--sm ds-icon--filled" aria-hidden="true">info</span>
+          <span>Design prototype — this destination isn’t built yet, so it doesn’t navigate.</span>
+        </div>
+      </div>
+      <div class="ds-dialog__divider" aria-hidden="true"></div>
+      <div class="ds-dialog__actions">
+        <button class="ds-button ds-button--filled ds-button--md" type="button" (click)="closeIntentDialog()">Got it</button>
+      </div>
+    </div>
+  </div>
+}

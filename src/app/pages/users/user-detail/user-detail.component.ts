@@ -1,9 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { findUserGroup } from '../explorer-groups';
-import { UserRow, findUserById, roleLabel } from '../users.data';
+import { UserRow, findUserById, linkedUsers, roleLabel } from '../users.data';
 
 // Each section renders from a small typed model so real data can be swapped in
 // later without touching the template. Filler values are flagged inline.
@@ -11,11 +11,11 @@ import { UserRow, findUserById, roleLabel } from '../users.data';
 // with multiple emails / phones).
 interface InfoField { label: string; value: string | string[]; }
 interface AssetRow { icon: string; name: string; tag: string; status: string; color: string; }
-interface TicketStat { icon: string; label: string; value: string; tone: 'blue' | 'orange' | 'grey'; }
+interface TicketStat { icon: string; label: string; value: string; tone: 'blue' | 'orange' | 'purple' | 'grey'; }
 interface RecentTicket { subject: string; status: string; color: string; date: string; }
 interface UserNote { author: string; initials: string; timestamp: string; body: string; }
 interface LinkedField { label: string; value: string; }
-interface LinkedPerson { name: string; initials: string; badge: string; fields: LinkedField[]; }
+interface LinkedPerson { id: string; role: string; name: string; initials: string; badge: string; fields: LinkedField[]; }
 interface LinkedSection { title: string; badgeColor: string; people: LinkedPerson[]; }
 
 @Component({
@@ -53,10 +53,7 @@ export class UserDetailComponent {
   readonly userRoleName = computed(() => roleLabel(this.user()?.role ?? ''));
 
   // Avatar monogram from the user's name.
-  readonly initials = computed(() => {
-    const name = this.user()?.name ?? '';
-    return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
-  });
+  readonly initials = computed(() => this.initialsOf(this.user()?.name ?? ''));
 
   // ── Basic Information — the fields shown here are dynamic: a district maps them
   // from its integration + field-mapping config, so the set (and any custom fields)
@@ -167,60 +164,59 @@ export class UserDetailComponent {
   }
 
   // ── Linked relationships — students show their guardians; parents (and staff who
-  // are also parents) show their linked students. A parent's own record is minimal,
-  // so the linked students carry most of the detail. Role-driven filler; linked
-  // names reuse this user's surname. In production this is per-user link data, not
-  // derived from the primary role.
-  // TODO eng: load real guardian / student links for this user.
+  // are also parents) show their linked students. These are REAL users from the pool
+  // (deterministically seeded by this user's id), so each card opens a populated
+  // profile and the fields come straight from that linked user's record.
+  // TODO eng: load this user's actual guardian / student links.
   readonly linkedSection = computed<LinkedSection | null>(() => {
-    const slug = this.user()?.role ?? '';
-    const surname = (this.user()?.name ?? '').split(' ').filter(Boolean).slice(-1)[0] ?? '';
-    const lc = surname.toLowerCase();
+    const u = this.user();
+    if (!u) return null;
 
-    if (slug === 'student') {
+    if (u.role === 'student') {
       return {
-        title: 'Guardians',
-        badgeColor: 'pink',
-        people: [
-          { name: `Patricia ${surname}`, initials: this.monogram('Patricia', surname), badge: 'Mother', fields: [
-            { label: 'Mobile', value: '(555) 274-1180' },
-            { label: 'Email',  value: `p.${lc}@example.com` },
-          ] },
-          { name: `Marcus ${surname}`, initials: this.monogram('Marcus', surname), badge: 'Father', fields: [
-            { label: 'Mobile', value: '(555) 274-2245' },
-            { label: 'Email',  value: `m.${lc}@example.com` },
-          ] },
-        ],
+        title: 'Parent / Guardian',
+        badgeColor: 'purple',
+        people: linkedUsers(u.id, 'parent-guardian', 2, u.id).map((p, i) => ({
+          id: p.id,
+          role: p.role,
+          name: p.name,
+          initials: this.initialsOf(p.name),
+          badge: `Parent ${i + 1}`,
+          fields: [
+            { label: 'Mobile', value: p.phone ?? '—' },
+            { label: 'Email',  value: p.email },
+          ],
+        })),
       };
     }
 
     // Parents — and staff members who are also parents — show their linked students.
-    if (slug === 'parent-guardian' || slug === 'staff') {
+    if (u.role === 'parent-guardian' || u.role === 'staff') {
       return {
         title: 'Linked Students',
-        badgeColor: 'green',
-        people: [
-          { name: `Ella ${surname}`, initials: this.monogram('Ella', surname), badge: 'Student', fields: [
-            { label: 'Grade',      value: '9th Grade' },
-            { label: 'School',     value: 'Lincoln High' },
-            { label: 'Student ID', value: 'S-100731' },
-            { label: 'Homeroom',   value: 'Room 112' },
-          ] },
-          { name: `Noah ${surname}`, initials: this.monogram('Noah', surname), badge: 'Student', fields: [
-            { label: 'Grade',      value: '6th Grade' },
-            { label: 'School',     value: 'Washington Middle' },
-            { label: 'Student ID', value: 'S-100920' },
-            { label: 'Homeroom',   value: 'Room 204' },
-          ] },
-        ],
+        badgeColor: 'brand',
+        people: linkedUsers(u.id, 'student', 2, u.id).map(s => ({
+          id: s.id,
+          role: s.role,
+          name: s.name,
+          initials: this.initialsOf(s.name),
+          badge: 'Student',
+          fields: [
+            { label: 'Grade',      value: s.gradeLabel ?? '—' },
+            { label: 'School',     value: s.location },
+            { label: 'Student ID', value: s.studentId ?? '—' },
+            { label: 'Homeroom',   value: s.homeroom ?? '—' },
+          ],
+        })),
       };
     }
 
     return null;
   });
 
-  private monogram(first: string, last: string): string {
-    return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
+  /** Two-letter monogram from a full name ('Ella Carter' → 'EC'). */
+  private initialsOf(name: string): string {
+    return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
   }
 
   // ── Filler section data — layout placeholders until real sources are wired.
@@ -233,23 +229,58 @@ export class UserDetailComponent {
 
   // TODO eng: replace with real ticket aggregates for this user.
   readonly ticketStats: TicketStat[] = [
-    { icon: 'inbox',        label: 'New',         value: '2',  tone: 'blue' },
-    { icon: 'autorenew',    label: 'In Progress', value: '1',  tone: 'orange' },
-    { icon: 'check_circle', label: 'Closed',      value: '14', tone: 'grey' },
+    { icon: 'inbox',        label: 'Unopened',        value: '2',  tone: 'blue' },
+    { icon: 'autorenew',    label: 'In Progress',     value: '1',  tone: 'orange' },
+    { icon: 'pending',      label: 'Pending Details', value: '1',  tone: 'purple' },
+    { icon: 'check_circle', label: 'Closed',          value: '14', tone: 'grey' },
   ];
 
   // TODO eng: replace with this user's real recent tickets.
   readonly recentTickets: RecentTicket[] = [
-    { subject: 'Chromebook won’t charge',  status: 'Open',        color: 'yellow', date: 'Jun 7, 2026' },
-    { subject: 'Password reset request',   status: 'In Progress', color: 'blue',   date: 'Jun 4, 2026' },
-    { subject: 'Projector not displaying', status: 'Resolved',    color: 'green',  date: 'May 28, 2026' },
+    { subject: 'Chromebook won’t charge',  status: 'In Progress',     color: 'orange', date: 'Jun 7, 2026' },
+    { subject: 'Password reset request',   status: 'Pending Details', color: 'purple', date: 'Jun 4, 2026' },
+    { subject: 'Projector not displaying', status: 'Closed',          color: 'grey',   date: 'May 28, 2026' },
   ];
+
+  // ── Navigation intent — design-mode stand-in. The Inbox and ticket detail
+  // views don't exist in this prototype, so "View all" and the recent-activity
+  // rows don't navigate; they open a small dialog describing what they WOULD
+  // open, so eng / stakeholders can see the intent without leaving the page.
+  // TODO eng: replace these popups with real navigation — "View all" → Inbox
+  // filtered to this user; a row → that ticket's detail view.
+  readonly intentDialog = signal<{ title: string; body: string } | null>(null);
+
+  showAllTicketsIntent(): void {
+    const name = this.user()?.name ?? 'this user';
+    this.intentDialog.set({
+      title: 'View all tickets',
+      body: `Opens the Inbox filtered to every ticket for ${name}.`,
+    });
+  }
+
+  showTicketIntent(ticket: RecentTicket): void {
+    this.intentDialog.set({
+      title: 'Open ticket',
+      body: `Opens “${ticket.subject}” in the Inbox ticket view.`,
+    });
+  }
+
+  showAssetIntent(asset: AssetRow): void {
+    this.intentDialog.set({
+      title: 'Open asset',
+      body: `Opens the asset record for “${asset.name}” (Asset #${asset.tag}).`,
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  closeIntentDialog(): void {
+    this.intentDialog.set(null);
+  }
 
   // ── Notes — agent-authored notes about this user. Filler entries; notes added
   // via the composer prepend to the list (local-only, not persisted in design mode).
   // TODO eng: persist notes (create + load) for this user.
   readonly notes = signal<UserNote[]>([
-    { author: 'Maria Chen',   initials: 'MC', timestamp: 'Jun 6, 2026',  body: 'Confirmed identity in person at the front office and refreshed the recovery email on file.' },
     { author: 'Devon Clark',  initials: 'DC', timestamp: 'May 30, 2026', body: 'Goes by a preferred first name. Updated the display name to match and kept the legal name in the SIS record.' },
     { author: 'Front Office', initials: 'FO', timestamp: 'May 22, 2026', body: 'Prefers email for non-urgent contact; avoid phone calls during the school day.' },
   ]);

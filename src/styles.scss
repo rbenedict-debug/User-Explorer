@@ -14,6 +14,11 @@ html, body {
 // (User Explorer › Role › User). Not a DS component yet; token-based stand-in.
 // TODO eng: promote to a real ds-breadcrumb component.
 .breadcrumb {
+  /* Match ds-page-content__title's padding box so the breadcrumb left-aligns with the page
+     title: the title adds padding-left: --spacing-lg on top of ds-page-content's own
+     --spacing-lg gutter, and a leading --spacing-sm. Mirrors the Modules agent-profile
+     breadcrumb so the pattern is identical across projects. */
+  padding: var(--spacing-sm) 0 0 var(--spacing-lg);
   margin-bottom: var(--spacing-xs);
 
   &__list {

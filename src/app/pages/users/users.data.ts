@@ -131,3 +131,13 @@ export function usersByLocation(locationSlug: string): UserRow[] {
   // Anyone can be based at a building; seeded slice over the whole pool.
   return seededSlice(USERS, locationSlug, 10);
 }
+
+/** Real, navigable linked users of a given role — guardians for a student, students
+ *  for a parent/staff member. Seeded by `seed` (the viewing user's id) so the set is
+ *  stable and distinct per profile, and `excludeId` keeps a user out of their own
+ *  linked list. Returns real rows so each linked card opens a populated profile.
+ *  TODO eng: replace with real guardian / student link records. */
+export function linkedUsers(seed: string, roleSlug: string, count: number, excludeId?: string): UserRow[] {
+  const pool = USERS.filter(u => u.role === roleSlug && u.id !== excludeId);
+  return seededSlice(pool, seed, count);
+}
