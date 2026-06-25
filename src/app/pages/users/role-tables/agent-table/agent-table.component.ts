@@ -5,35 +5,39 @@ import { usersByRole, UserRow } from '../../users.data';
 declare const OnfloTableInit: { initTable: (config: any) => void };
 
 @Component({
-  selector: 'app-technician-table',
+  selector: 'app-agent-table',
   imports: [RouterLink],
-  templateUrl: './technician-table.component.html',
-  styleUrl: './technician-table.component.scss',
+  templateUrl: './agent-table.component.html',
+  styleUrl: './agent-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'ds-page-content', role: 'main' },
 })
-export class TechnicianTableComponent implements AfterViewInit, OnDestroy {
+export class AgentTableComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly host = inject(ElementRef).nativeElement as HTMLElement;
 
-  private readonly roleSlug = 'technician';
+  // Agent is the merged Administrator + Technician role — both former roles now
+  // carry role 'agent' in the data, so one selector returns the whole group.
+  private readonly roleSlug = 'agent';
   readonly users = signal<UserRow[]>(usersByRole(this.roleSlug));
 
   readonly columns = [
-    { name: 'Name',            width: 220, type: 'text',   _categorical: false, _badgeOptions: null },
-    { name: 'Email',           width: 250, type: 'text',   _categorical: false, _badgeOptions: null },
-    { name: 'Building',        width: 200, type: 'text',   _categorical: true,  _badgeOptions: null },
-    { name: 'Assigned Assets', width: 150, type: 'number', _categorical: false, _badgeOptions: null },
-    { name: 'Open Tickets',    width: 140, type: 'number', _categorical: false, _badgeOptions: null },
-    { name: 'Status',          width: 130, type: 'badge',  _categorical: true,  _badgeOptions: [{ l: 'Active', c: 'green' }, { l: 'Inactive', c: 'grey' }] },
-    { name: 'Last Active',     width: 150, type: 'date',   _categorical: false, _badgeOptions: null },
+    { name: 'Name',        width: 220, type: 'text',  _categorical: false, _badgeOptions: null },
+    { name: 'Email',       width: 250, type: 'text',  _categorical: false, _badgeOptions: null },
+    { name: 'Department',  width: 200, type: 'text',  _categorical: true,  _badgeOptions: null },
+    { name: 'Title',       width: 190, type: 'text',  _categorical: false, _badgeOptions: null },
+    { name: 'Building',    width: 200, type: 'text',  _categorical: true,  _badgeOptions: null },
+    { name: 'Status',      width: 130, type: 'badge', _categorical: true,  _badgeOptions: [{ l: 'Active', c: 'green' }, { l: 'Inactive', c: 'grey' }] },
+    { name: 'Last Active', width: 150, type: 'date',  _categorical: false, _badgeOptions: null },
   ];
 
   get totalWidth(): number {
     return this.columns.reduce((sum, col) => sum + col.width, 0) + 20;
   }
 
+  // table-init.js re-renders rows via innerHTML (stripping Angular's encapsulation
+  // attribute), so delegate the row click from the host and match by email/name.
   private readonly onTableClick = (event: Event): void => {
     const row = (event.target as HTMLElement).closest('tbody tr');
     if (!row) return;

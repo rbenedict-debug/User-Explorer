@@ -25,29 +25,31 @@ export interface UserRow {
   homeroom?: string;       // students
   studentId?: string;      // students
   guardian?: string;       // students — primary guardian name
-  assignedAssets?: number; // students, teachers, technicians
-  openTickets?: number;    // technicians, staff
-  department?: string;     // administrator, staff, teacher, technician
-  title?: string;          // administrator, staff, technician
-  phone?: string;          // parent/guardian, staff, administrator
+  assignedAssets?: number; // students, teachers, agents
+  openTickets?: number;    // agents, staff
+  department?: string;     // agents, staff, teachers
+  title?: string;          // agents, staff
+  phone?: string;          // parent/guardian, staff, agents
   linkedStudents?: number; // parent/guardian
 }
 
 export const USERS: UserRow[] = [
-  // ── Administrators ────────────────────────────────────────────────────────
-  { id: 'adm1', name: 'Taylor Morgan',   email: 'tmorgan@district.k12.us',   role: 'administrator', location: 'District Office',      locationSlug: 'district-office',      status: 'Active',   lastActive: 'Jun 15, 2026', dateAdded: 'Feb 3, 2021',  department: 'District Administration', title: 'Superintendent',         phone: '(555) 740-3301' },
-  { id: 'adm2', name: 'Avery Sullivan',  email: 'asullivan@district.k12.us', role: 'administrator', location: 'Lincoln High',         locationSlug: 'lincoln-high',         status: 'Active',   lastActive: 'Jun 14, 2026', dateAdded: 'Jun 1, 2022',  department: 'School Administration',   title: 'Principal',              phone: '(555) 740-3312' },
-  { id: 'adm3', name: 'Dana Whitfield',  email: 'dwhitfield@district.k12.us', role: 'administrator', location: 'Washington Middle',   locationSlug: 'washington-middle',    status: 'Active',   lastActive: 'Jun 12, 2026', dateAdded: 'Aug 9, 2020',  department: 'School Administration',   title: 'Assistant Principal',    phone: '(555) 740-3327' },
-  { id: 'adm4', name: 'Priya Raman',     email: 'praman@district.k12.us',     role: 'administrator', location: 'District Office',      locationSlug: 'district-office',      status: 'Active',   lastActive: 'Jun 13, 2026', dateAdded: 'Jan 18, 2023', department: 'Curriculum & Instruction', title: 'Director of Curriculum', phone: '(555) 740-3344' },
-  { id: 'adm5', name: 'Gregory Pena',    email: 'gpena@district.k12.us',      role: 'administrator', location: 'Kennedy High',         locationSlug: 'kennedy-high',         status: 'Inactive', lastActive: 'Apr 2, 2026',  dateAdded: 'Sep 1, 2019',  department: 'School Administration',   title: 'Principal',              phone: '(555) 740-3359' },
+  // Agent is the merged Administrator + Technician role: both groups below carry
+  // role: 'agent'. They're kept as separate blocks only to show the title range.
+  // ── Agents · Administrators ────────────────────────────────────────────────────────
+  { id: 'adm1', name: 'Taylor Morgan',   email: 'tmorgan@district.k12.us',   role: 'agent', location: 'District Office',      locationSlug: 'district-office',      status: 'Active',   lastActive: 'Jun 15, 2026', dateAdded: 'Feb 3, 2021',  department: 'District Administration', title: 'Superintendent',         phone: '(555) 740-3301' },
+  { id: 'adm2', name: 'Avery Sullivan',  email: 'asullivan@district.k12.us', role: 'agent', location: 'Lincoln High',         locationSlug: 'lincoln-high',         status: 'Active',   lastActive: 'Jun 14, 2026', dateAdded: 'Jun 1, 2022',  department: 'School Administration',   title: 'Principal',              phone: '(555) 740-3312' },
+  { id: 'adm3', name: 'Dana Whitfield',  email: 'dwhitfield@district.k12.us', role: 'agent', location: 'Washington Middle',   locationSlug: 'washington-middle',    status: 'Active',   lastActive: 'Jun 12, 2026', dateAdded: 'Aug 9, 2020',  department: 'School Administration',   title: 'Assistant Principal',    phone: '(555) 740-3327' },
+  { id: 'adm4', name: 'Priya Raman',     email: 'praman@district.k12.us',     role: 'agent', location: 'District Office',      locationSlug: 'district-office',      status: 'Active',   lastActive: 'Jun 13, 2026', dateAdded: 'Jan 18, 2023', department: 'Curriculum & Instruction', title: 'Director of Curriculum', phone: '(555) 740-3344' },
+  { id: 'adm5', name: 'Gregory Pena',    email: 'gpena@district.k12.us',      role: 'agent', location: 'Kennedy High',         locationSlug: 'kennedy-high',         status: 'Inactive', lastActive: 'Apr 2, 2026',  dateAdded: 'Sep 1, 2019',  department: 'School Administration',   title: 'Principal',              phone: '(555) 740-3359' },
 
-  // ── Technicians ───────────────────────────────────────────────────────────
-  { id: 'tec1', name: 'Jordan Lee',      email: 'jlee@district.k12.us',       role: 'technician', location: 'Washington Middle',  locationSlug: 'washington-middle',  status: 'Active',   lastActive: 'Jun 15, 2026', dateAdded: 'Jan 10, 2024', department: 'IT Services', title: 'Field Technician',      assignedAssets: 142, openTickets: 7 },
-  { id: 'tec2', name: 'Marcus Bell',     email: 'mbell@district.k12.us',      role: 'technician', location: 'District Office',    locationSlug: 'district-office',    status: 'Active',   lastActive: 'Jun 14, 2026', dateAdded: 'Mar 22, 2022', department: 'IT Services', title: 'Senior Technician',     assignedAssets: 310, openTickets: 3 },
-  { id: 'tec3', name: 'Hannah Voss',     email: 'hvoss@district.k12.us',      role: 'technician', location: 'Lincoln High',       locationSlug: 'lincoln-high',       status: 'Active',   lastActive: 'Jun 11, 2026', dateAdded: 'Oct 5, 2023',  department: 'IT Services', title: 'Field Technician',      assignedAssets: 198, openTickets: 12 },
-  { id: 'tec4', name: 'Diego Ramos',     email: 'dramos@district.k12.us',     role: 'technician', location: 'Eastview Middle',    locationSlug: 'eastview-middle',    status: 'Active',   lastActive: 'Jun 9, 2026',  dateAdded: 'Jul 14, 2021', department: 'IT Services', title: 'Field Technician',      assignedAssets: 167, openTickets: 5 },
-  { id: 'tec5', name: 'Olivia Brennan',  email: 'obrennan@district.k12.us',   role: 'technician', location: 'Kennedy High',       locationSlug: 'kennedy-high',       status: 'Active',   lastActive: 'Jun 13, 2026', dateAdded: 'Feb 28, 2024', department: 'IT Services', title: 'Deployment Technician', assignedAssets: 256, openTickets: 9 },
-  { id: 'tec6', name: 'Sean Okafor',     email: 'sokafor@district.k12.us',    role: 'technician', location: 'Crestwood Middle',   locationSlug: 'crestwood-middle',   status: 'Inactive', lastActive: 'Feb 19, 2026', dateAdded: 'May 3, 2020',  department: 'IT Services', title: 'Field Technician',      assignedAssets: 88,  openTickets: 0 },
+  // ── Agents · Technicians ───────────────────────────────────────────────────────────
+  { id: 'tec1', name: 'Jordan Lee',      email: 'jlee@district.k12.us',       role: 'agent', location: 'Washington Middle',  locationSlug: 'washington-middle',  status: 'Active',   lastActive: 'Jun 15, 2026', dateAdded: 'Jan 10, 2024', department: 'IT Services', title: 'Field Technician',      assignedAssets: 142, openTickets: 7 },
+  { id: 'tec2', name: 'Marcus Bell',     email: 'mbell@district.k12.us',      role: 'agent', location: 'District Office',    locationSlug: 'district-office',    status: 'Active',   lastActive: 'Jun 14, 2026', dateAdded: 'Mar 22, 2022', department: 'IT Services', title: 'Senior Technician',     assignedAssets: 310, openTickets: 3 },
+  { id: 'tec3', name: 'Hannah Voss',     email: 'hvoss@district.k12.us',      role: 'agent', location: 'Lincoln High',       locationSlug: 'lincoln-high',       status: 'Active',   lastActive: 'Jun 11, 2026', dateAdded: 'Oct 5, 2023',  department: 'IT Services', title: 'Field Technician',      assignedAssets: 198, openTickets: 12 },
+  { id: 'tec4', name: 'Diego Ramos',     email: 'dramos@district.k12.us',     role: 'agent', location: 'Eastview Middle',    locationSlug: 'eastview-middle',    status: 'Active',   lastActive: 'Jun 9, 2026',  dateAdded: 'Jul 14, 2021', department: 'IT Services', title: 'Field Technician',      assignedAssets: 167, openTickets: 5 },
+  { id: 'tec5', name: 'Olivia Brennan',  email: 'obrennan@district.k12.us',   role: 'agent', location: 'Kennedy High',       locationSlug: 'kennedy-high',       status: 'Active',   lastActive: 'Jun 13, 2026', dateAdded: 'Feb 28, 2024', department: 'IT Services', title: 'Deployment Technician', assignedAssets: 256, openTickets: 9 },
+  { id: 'tec6', name: 'Sean Okafor',     email: 'sokafor@district.k12.us',    role: 'agent', location: 'Crestwood Middle',   locationSlug: 'crestwood-middle',   status: 'Inactive', lastActive: 'Feb 19, 2026', dateAdded: 'May 3, 2020',  department: 'IT Services', title: 'Field Technician',      assignedAssets: 88,  openTickets: 0 },
 
   // ── Teachers ──────────────────────────────────────────────────────────────
   { id: 'tch1', name: 'Alex Johnson',    email: 'ajohnson@district.k12.us',   role: 'teacher', location: 'Lincoln High',         locationSlug: 'lincoln-high',         status: 'Active',   lastActive: 'Jun 15, 2026', dateAdded: 'Aug 14, 2023', department: 'Mathematics',     assignedAssets: 2 },
@@ -85,6 +87,14 @@ export const USERS: UserRow[] = [
   { id: 'par4', name: 'Robert Thompson', email: 'rthompson@example.com',  role: 'parent-guardian', location: 'Eastview Middle',      locationSlug: 'eastview-middle',      status: 'Active',   lastActive: 'Jun 2, 2026',  dateAdded: 'Aug 23, 2023', phone: '(555) 228-4538', linkedStudents: 2 },
   { id: 'par5', name: 'Denise Williams', email: 'dwilliams@example.com',  role: 'parent-guardian', location: 'Kennedy High',         locationSlug: 'kennedy-high',         status: 'Inactive', lastActive: 'Dec 12, 2025', dateAdded: 'Sep 2, 2022',  phone: '(555) 228-4559', linkedStudents: 1 },
   { id: 'par6', name: 'Maria Cruz',      email: 'mcruz@example.com',      role: 'parent-guardian', location: 'Franklin Early Learning Center', locationSlug: 'franklin-early-learning', status: 'Active', lastActive: 'Jun 6, 2026', dateAdded: 'Aug 26, 2025', phone: '(555) 228-4577', linkedStudents: 1 },
+
+  // ── Guests ──────────────────────────────────────────────────────────────
+  // Limited / external accounts — substitutes, contractors, volunteers. Minimal
+  // directory info and often time-boxed access (no department / title).
+  { id: 'gst1', name: 'Pat Sullivan',    email: 'psullivan@guest.district.k12.us', role: 'guest', location: 'Lincoln High',         locationSlug: 'lincoln-high',         status: 'Active',   lastActive: 'Jun 14, 2026', dateAdded: 'May 1, 2026'  },
+  { id: 'gst2', name: 'Robin Avery',     email: 'ravery@contractor.example.com',   role: 'guest', location: 'District Office',      locationSlug: 'district-office',      status: 'Active',   lastActive: 'Jun 12, 2026', dateAdded: 'Apr 18, 2026' },
+  { id: 'gst3', name: 'Jesse Kim',       email: 'jkim@guest.district.k12.us',      role: 'guest', location: 'Washington Middle',    locationSlug: 'washington-middle',    status: 'Inactive', lastActive: 'Mar 9, 2026',  dateAdded: 'Feb 2, 2026'  },
+  { id: 'gst4', name: 'Sam Delgado',     email: 'sdelgado@volunteer.example.com',  role: 'guest', location: 'Roosevelt Elementary', locationSlug: 'roosevelt-elementary', status: 'Active',   lastActive: 'Jun 10, 2026', dateAdded: 'May 20, 2026' },
 ];
 
 // ── Display helpers ─────────────────────────────────────────────────────────

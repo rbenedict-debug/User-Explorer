@@ -282,3 +282,7 @@
 .role-icon--orange  { background: var(--color-surface-accent-orange); color: var(--color-icon-accent-orange); }
 .role-icon--green   { background: var(--color-surface-accent-green);  color: var(--color-icon-accent-green); }
 .role-icon--pink    { background: var(--color-surface-accent-pink);   color: var(--color-icon-accent-pink); }
+
+// "All Roles" is an aggregate, not a peer role — a neutral tile sets it apart
+// from the accent-colored role cards. Subtle surface + secondary icon color.
+.role-icon--neutral { background: var(--color-surface-subtle);        color: var(--color-text-secondary); }

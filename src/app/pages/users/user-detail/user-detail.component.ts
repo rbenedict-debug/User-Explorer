@@ -106,27 +106,29 @@ export class UserDetailComponent {
           { label: 'Title',      value: 'Office Coordinator' },
           { label: 'Start Date', value: u.dateAdded },
         ];
-      case 'administrator':
+      case 'agent':
+        // Agent merges the former Administrator + Technician roles, so the field
+        // set spans both — org placement plus access. Department / Title come
+        // from the user's own record (Superintendent … Field Technician).
         return [
           { label: 'Email',        value: u.email },
           { label: 'Phone',        value: '(555) 555-0100' },
           { label: 'Mobile',       value: '(555) 740-3321' },
-          { label: 'Department',   value: 'District Administration' },
-          { label: 'Building',     value: 'District Office' },
+          { label: 'Department',   value: u.department ?? 'District Administration' },
+          { label: 'Building',     value: u.location },
           { label: 'Staff ID',     value: 'E-10002' },
-          { label: 'Title',        value: 'Principal' },
-          { label: 'Access Level', value: 'District Admin' },
+          { label: 'Title',        value: u.title ?? 'Agent' },
+          { label: 'Access Level', value: 'Agent — Full' },
         ];
-      case 'technician':
+      case 'guest':
         return [
           { label: 'Email',          value: u.email },
-          { label: 'Phone',          value: '(555) 555-0550' },
-          { label: 'Mobile',         value: '(555) 663-8890' },
-          { label: 'Department',     value: 'IT Services' },
-          { label: 'Coverage Area',  value: 'North Campus' },
-          { label: 'Staff ID',       value: 'E-44820' },
-          { label: 'Title',          value: 'Field Technician' },
-          { label: 'Certifications', value: 'CompTIA A+' },
+          { label: 'Phone',          value: '(555) 555-0760' },
+          { label: 'Sponsored By',   value: 'Front Office' },
+          { label: 'Building',       value: u.location },
+          { label: 'Access Level',   value: 'Guest — Limited' },
+          { label: 'Access Expires', value: 'Aug 31, 2026' },
+          { label: 'Date Added',     value: u.dateAdded },
         ];
       case 'parent-guardian': {
         // Parents carry minimal direct details — most of the record is their

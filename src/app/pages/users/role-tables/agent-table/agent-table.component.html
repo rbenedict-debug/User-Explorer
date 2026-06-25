@@ -10,11 +10,11 @@
         <span class="ds-icon ds-icon--xs">chevron_right</span>
       </li>
       <li class="breadcrumb__item">
-        <span class="breadcrumb__current" aria-current="page">Technician</span>
+        <span class="breadcrumb__current" aria-current="page">Agent</span>
       </li>
     </ol>
   </nav>
-  <h1 class="ds-page-content__title">Technician</h1>
+  <h1 class="ds-page-content__title">Agent</h1>
 </div>
 
 <div class="ds-page-content__main ds-page-content__main--table">
@@ -105,26 +105,26 @@
                 </th>
                 <th style="width:200px">
                   <div class="ds-table__header-content">
+                    <span class="ds-table__header-label">Department</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Department">
+                      <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
+                    </button>
+                  </div>
+                  <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
+                </th>
+                <th style="width:190px">
+                  <div class="ds-table__header-content">
+                    <span class="ds-table__header-label">Title</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Title">
+                      <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
+                    </button>
+                  </div>
+                  <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
+                </th>
+                <th style="width:200px">
+                  <div class="ds-table__header-content">
                     <span class="ds-table__header-label">Building</span>
                     <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Building">
-                      <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
-                    </button>
-                  </div>
-                  <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
-                </th>
-                <th style="width:150px">
-                  <div class="ds-table__header-content">
-                    <span class="ds-table__header-label">Assigned Assets</span>
-                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Assigned Assets">
-                      <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
-                    </button>
-                  </div>
-                  <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
-                </th>
-                <th style="width:140px">
-                  <div class="ds-table__header-content">
-                    <span class="ds-table__header-label">Open Tickets</span>
-                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Open Tickets">
                       <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
                     </button>
                   </div>
@@ -155,9 +155,9 @@
                 <tr>
                   <td>{{ user.name }}</td>
                   <td>{{ user.email }}</td>
+                  <td>{{ user.department }}</td>
+                  <td>{{ user.title }}</td>
                   <td>{{ user.location }}</td>
-                  <td>{{ user.assignedAssets }}</td>
-                  <td>{{ user.openTickets }}</td>
                   <td>
                     @if (user.status === 'Active') {
                       <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--green">Active</span>
@@ -524,4 +524,4 @@
 </div>
 
 <!-- table-init.js is loaded via angular.json scripts; the initTable() config
-     lives in technician-table.component.ts → ngAfterViewInit(). -->
+     lives in agent-table.component.ts → ngAfterViewInit(). -->
