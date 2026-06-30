@@ -17,6 +17,15 @@ interface UserNote { author: string; initials: string; timestamp: string; body: 
 interface LinkedField { label: string; value: string; }
 interface LinkedPerson { id: string; role: string; name: string; initials: string; badge: string; fields: LinkedField[]; }
 interface LinkedSection { title: string; badgeColor: string; people: LinkedPerson[]; }
+// A fee (client-defined charge) or part (consumable used on an asset). Both render as a
+// row in their section's table. Status shows as a grey ds-label pill — prod displays all
+// fee/part statuses in grey (not color-coded), so the pill colour isn't data-driven.
+interface FeeRow { name: string; amount: number; status: 'Paid' | 'Unpaid' | 'Waived'; ticket: string; }
+interface PartRow { name: string; amount: number; status: 'Installed' | 'Queued' | 'Ordered'; ticket: string; }
+// Roll-up shown in each section's summary callout: a status breakdown line plus the
+// right-aligned totals (the emphasised one is the figure that matters most).
+interface SummaryTotal { label: string; value: string; emphasis?: boolean; }
+interface SectionSummary { sub: string; totals: SummaryTotal[]; }
 
 @Component({
   selector: 'app-user-detail',
@@ -49,8 +58,18 @@ export class UserDetailComponent {
   readonly category = computed(() => this.params().category);
   readonly user = computed(() => findUserById(this.params().user));
 
-  // The user's own role name (independent of how they were reached).
-  readonly userRoleName = computed(() => roleLabel(this.user()?.role ?? ''));
+  // Hero subtitle. Roled users read "Role · Building". Legacy users whose client
+  // never adopted the authenticated portal have no role, so they fall back to their
+  // customer type — "Community Member (no role) · Building" — which is the only
+  // grouping dimension they carry.
+  readonly heroSubtitle = computed(() => {
+    const u = this.user();
+    if (!u) return '';
+    const primary = u.role
+      ? roleLabel(u.role)
+      : (u.customerType ? `${u.customerType} (no role)` : 'No role');
+    return u.location ? `${primary} · ${u.location}` : primary;
+  });
 
   // Avatar monogram from the user's name.
   readonly initials = computed(() => this.initialsOf(this.user()?.name ?? ''));
@@ -62,7 +81,11 @@ export class UserDetailComponent {
   readonly basicInfo = computed<InfoField[]>(() => {
     const u = this.user();
     if (!u) return [];
-    return this.fieldsFor(u.role, u);
+    const fields = this.fieldsFor(u.role, u);
+    // Customer Type is a first-class legacy field every user carries (and the only
+    // grouping for role-less users) — surface it right after Email.
+    fields.splice(1, 0, { label: 'Customer Type', value: u.customerType ?? '—' });
+    return fields;
   });
 
   /** Normalize a field's value to a list so the template renders single- and
@@ -244,6 +267,62 @@ export class UserDetailComponent {
     { subject: 'Projector not displaying', status: 'Closed',          color: 'grey',   date: 'May 28, 2026' },
   ];
 
+  /** Format a whole-dollar amount for display: 251 → "$251". */
+  money(amount: number): string {
+    return `$${amount.toLocaleString('en-US')}`;
+  }
+
+  // ── Fees — client-defined charges (device damage, lost / replaced items, etc.). The
+  // district sets up what each fee is and may waive it; the summary rolls the amounts up
+  // into added / paid / waived / outstanding. Students only. Filler.
+  // TODO eng: load this student's real fees + waivers.
+  readonly fees = signal<FeeRow[]>([
+    { name: 'Screen Repair',        amount: 176, status: 'Unpaid', ticket: '05512' },
+    { name: 'Keyboard Replacement', amount: 50,  status: 'Paid',   ticket: '05488' },
+    { name: 'Carrying Case',        amount: 25,  status: 'Waived', ticket: '05401' },
+  ]);
+
+  readonly feeSummary = computed<SectionSummary>(() => {
+    const fees = this.fees();
+    const totalFor = (status: FeeRow['status']) =>
+      fees.filter(f => f.status === status).reduce((sum, f) => sum + f.amount, 0);
+    const countFor = (status: FeeRow['status']) => fees.filter(f => f.status === status).length;
+    const added = fees.reduce((sum, f) => sum + f.amount, 0);
+    const paid = totalFor('Paid');
+    const waived = totalFor('Waived');
+    return {
+      sub: `${countFor('Paid')} paid · ${countFor('Unpaid')} unpaid · ${countFor('Waived')} waived`,
+      totals: [
+        { label: 'Total Added',         value: this.money(added) },
+        { label: 'Total Paid',          value: this.money(paid) },
+        { label: 'Total Waived',        value: this.money(waived) },
+        { label: 'Outstanding Balance', value: this.money(added - paid - waived), emphasis: true },
+      ],
+    };
+  });
+
+  // ── Parts — consumable components used on this student's assets during a repair (each
+  // comes from a ticket). Tracked from order → queued → installed. Students only. Filler.
+  // TODO eng: load real parts consumed for this student's assets.
+  readonly parts = signal<PartRow[]>([
+    { name: 'Replacement Keyboard', amount: 45, status: 'Installed', ticket: '05512' },
+    { name: 'USB-C Charging Cable', amount: 12, status: 'Queued',    ticket: '05488' },
+    { name: 'Battery Replacement',  amount: 38, status: 'Ordered',   ticket: '05377' },
+  ]);
+
+  readonly partSummary = computed<SectionSummary>(() => {
+    const parts = this.parts();
+    const countFor = (status: PartRow['status']) => parts.filter(p => p.status === status).length;
+    const total = parts.reduce((sum, p) => sum + p.amount, 0);
+    return {
+      sub: `${countFor('Installed')} installed · ${countFor('Queued')} queued · ${countFor('Ordered')} ordered`,
+      totals: [
+        { label: 'Parts Added', value: `${parts.length}` },
+        { label: 'Total Value', value: this.money(total), emphasis: true },
+      ],
+    };
+  });
+
   // ── Navigation intent — design-mode stand-in. The Inbox and ticket detail
   // views don't exist in this prototype, so "View all" and the recent-activity
   // rows don't navigate; they open a small dialog describing what they WOULD
@@ -251,6 +330,14 @@ export class UserDetailComponent {
   // TODO eng: replace these popups with real navigation — "View all" → Inbox
   // filtered to this user; a row → that ticket's detail view.
   readonly intentDialog = signal<{ title: string; body: string } | null>(null);
+
+  createTicketIntent(): void {
+    const name = this.user()?.name ?? 'this user';
+    this.intentDialog.set({
+      title: 'Create ticket',
+      body: `Opens a new ticket with ${name} pre-filled as the requester.`,
+    });
+  }
 
   showAllTicketsIntent(): void {
     const name = this.user()?.name ?? 'this user';
@@ -271,6 +358,21 @@ export class UserDetailComponent {
     this.intentDialog.set({
       title: 'Open asset',
       body: `Opens the asset record for “${asset.name}” (Asset #${asset.tag}).`,
+    });
+  }
+
+  assignAssetsIntent(): void {
+    const name = this.user()?.name ?? 'this user';
+    this.intentDialog.set({
+      title: 'Manage assets',
+      body: `Opens the asset assignment dialog to assign a new asset to ${name} or change a current assignment.`,
+    });
+  }
+
+  showTicketRefIntent(ticket: string): void {
+    this.intentDialog.set({
+      title: 'Open ticket',
+      body: `Opens ticket #${ticket} in the Inbox ticket view.`,
     });
   }
 

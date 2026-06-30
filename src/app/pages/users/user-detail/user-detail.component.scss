@@ -88,6 +88,13 @@
   min-width: 0;
 }
 
+/* Push the hero's primary action (Create ticket) to the far right of the row;
+   flex: none keeps the button at its natural width as the name column flexes. */
+.user-detail__hero-actions {
+  margin-inline-start: auto;
+  flex: none;
+}
+
 .user-detail__hero-name {
   margin: 0;
   @include ds.type-title-h3;
@@ -109,6 +116,14 @@
 .user-detail__section-head--count {
   justify-content: flex-start;
   gap: var(--spacing-sm);
+}
+
+/* A section-head action (e.g. Manage assets) pushed to the far right while the
+   title + count pill stay tucked together on the left. flex: none keeps the
+   button at its natural width. */
+.user-detail__section-action {
+  margin-inline-start: auto;
+  flex: none;
 }
 
 .user-detail__section-title {
@@ -357,4 +372,129 @@
   color: var(--color-text-secondary);
 
   .ds-icon { flex: none; color: var(--color-icon-info); }
+}
+
+/* ── Fees & Parts — summary callout + read-only data table ─────────────────────── */
+
+/* Section roll-up in a light-blue band (matches the blue ticket stat cards on this
+   page): intro on the left, right-aligned totals on the right; wraps on narrow widths. */
+.user-detail__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md) var(--spacing-xl);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  background-color: var(--color-surface-accent-blue);
+  border: 1px solid var(--color-border-accent-blue);
+  border-radius: var(--radius-md);
+}
+
+.user-detail__summary-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.user-detail__summary-title {
+  margin: 0;
+  @include ds.type-body-medium;
+  font-weight: var(--ref-typescale-body-medium-weight-prominent);
+  color: var(--color-text-primary);
+}
+
+.user-detail__summary-sub {
+  margin: 0;
+  @include ds.type-body-small;
+  color: var(--color-text-secondary);
+}
+
+.user-detail__summary-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg) var(--spacing-xl);
+  margin: 0;
+}
+
+.user-detail__summary-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+  text-align: right;
+}
+
+.user-detail__summary-total-label {
+  @include ds.type-label-small;
+  color: var(--color-text-secondary);
+}
+
+.user-detail__summary-total-value {
+  margin: 0;
+  @include ds.type-body-medium;
+  color: var(--color-text-primary);
+}
+
+/* Outstanding balance / total value — the figure that matters most. */
+.user-detail__summary-total--emphasis .user-detail__summary-total-value {
+  font-weight: var(--ref-typescale-body-medium-weight-prominent);
+}
+
+/* Read-only data table: header band + subtle row dividers inside a rounded, bordered
+   container. Static in design mode — real sorting/filtering is the eng table's concern. */
+.user-detail__table-wrap {
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.user-detail__table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: var(--spacing-md);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    @include ds.type-label-small;
+    color: var(--color-text-secondary);
+    background-color: var(--color-surface-secondary);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    @include ds.type-body-medium;
+    color: var(--color-text-primary);
+    border-top: 1px solid var(--color-border-secondary);
+  }
+}
+
+/* Ticket reference — opens the navigation-intent dialog in design mode (the Inbox
+   ticket view isn't built here). Styled as a link; keyboard focus shows the DS ring. */
+.user-detail__ticket-link {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  @include ds.type-body-medium;
+  color: var(--color-text-link);
+  border-radius: var(--radius-sm);
+
+  &:hover { text-decoration: underline; }
+  &:focus { outline: none; }
+  &:focus-visible { box-shadow: 0 0 0 3px var(--color-border-ada-focus-ring); }
+}
+
+.user-detail__empty {
+  margin: 0;
+  @include ds.type-body-medium;
+  color: var(--color-text-secondary);
 }

@@ -40,16 +40,22 @@ export class AllRolesTableComponent implements AfterViewInit, OnDestroy {
     return this.roleMeta[slug]?.color ?? 'grey';
   }
 
+  // Customer Type is a legacy classification used to find old users; it's
+  // categorical so it filters from the panel. Status / Last Active are dropped —
+  // we can't track them reliably for the whole pool.
   readonly columns = [
-    { name: 'Name',        width: 220, type: 'text',  _categorical: false, _badgeOptions: null },
-    { name: 'Email',       width: 250, type: 'text',  _categorical: false, _badgeOptions: null },
-    { name: 'Role',        width: 180, type: 'badge', _categorical: true,  _badgeOptions: [
+    { name: 'Name',              width: 200, type: 'text',   _categorical: false, _badgeOptions: null },
+    { name: 'Email',             width: 240, type: 'text',   _categorical: false, _badgeOptions: null },
+    { name: 'Phone',             width: 150, type: 'text',   _categorical: false, _badgeOptions: null },
+    { name: 'Role',              width: 160, type: 'badge',  _categorical: true,  _badgeOptions: [
       { l: 'Agent', c: 'blue' }, { l: 'Teacher', c: 'purple' }, { l: 'Staff', c: 'orange' },
       { l: 'Student', c: 'green' }, { l: 'Parent / Guardian', c: 'pink' }, { l: 'Guest', c: 'teal' },
+      { l: 'No role', c: 'grey' },
     ] },
-    { name: 'Building',    width: 200, type: 'text',  _categorical: true,  _badgeOptions: null },
-    { name: 'Status',      width: 130, type: 'badge', _categorical: true,  _badgeOptions: [{ l: 'Active', c: 'green' }, { l: 'Inactive', c: 'grey' }] },
-    { name: 'Last Active', width: 150, type: 'date',  _categorical: false, _badgeOptions: null },
+    { name: 'Customer Type',     width: 170, type: 'text',   _categorical: true,  _badgeOptions: null },
+    { name: 'Building',          width: 190, type: 'text',   _categorical: true,  _badgeOptions: null },
+    { name: 'Tickets Submitted', width: 150, type: 'number', _categorical: false, _badgeOptions: null },
+    { name: 'Assets',            width: 110, type: 'number', _categorical: false, _badgeOptions: null },
   ];
 
   get totalWidth(): number {

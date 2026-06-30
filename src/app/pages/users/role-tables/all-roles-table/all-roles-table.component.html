@@ -85,7 +85,7 @@
           <table class="ds-table" id="main-table" [style.min-width.px]="totalWidth">
             <thead>
               <tr>
-                <th style="width:220px">
+                <th style="width:200px">
                   <div class="ds-table__header-content">
                     <span class="ds-table__header-label">Name</span>
                     <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Name">
@@ -94,7 +94,7 @@
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:250px">
+                <th style="width:240px">
                   <div class="ds-table__header-content">
                     <span class="ds-table__header-label">Email</span>
                     <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Email">
@@ -103,7 +103,16 @@
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:180px">
+                <th style="width:150px">
+                  <div class="ds-table__header-content">
+                    <span class="ds-table__header-label">Phone</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Phone">
+                      <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
+                    </button>
+                  </div>
+                  <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
+                </th>
+                <th style="width:160px">
                   <div class="ds-table__header-content">
                     <span class="ds-table__header-label">Role</span>
                     <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Role">
@@ -112,7 +121,16 @@
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:200px">
+                <th style="width:170px">
+                  <div class="ds-table__header-content">
+                    <span class="ds-table__header-label">Customer Type</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Customer Type">
+                      <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
+                    </button>
+                  </div>
+                  <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
+                </th>
+                <th style="width:190px">
                   <div class="ds-table__header-content">
                     <span class="ds-table__header-label">Building</span>
                     <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Building">
@@ -121,19 +139,19 @@
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:130px">
+                <th style="width:150px">
                   <div class="ds-table__header-content">
-                    <span class="ds-table__header-label">Status</span>
-                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Status">
+                    <span class="ds-table__header-label">Tickets Submitted</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Tickets Submitted">
                       <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
                     </button>
                   </div>
                   <div class="ds-table__resize-handle"><div class="ds-table__resize-bar"></div></div>
                 </th>
-                <th style="width:150px">
+                <th style="width:110px">
                   <div class="ds-table__header-content">
-                    <span class="ds-table__header-label">Last Active</span>
-                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Last Active">
+                    <span class="ds-table__header-label">Assets</span>
+                    <button class="ds-icon-button ds-icon-button--icon ds-icon-button--sm ds-table__sort-btn" aria-label="Sort by Assets">
                       <span class="ds-icon ds-table__sort-icon--none">arrow_upward_alt</span>
                     </button>
                   </div>
@@ -146,18 +164,18 @@
                 <tr>
                   <td>{{ user.name }}</td>
                   <td>{{ user.email }}</td>
+                  <td>{{ user.phone }}</td>
                   <td>
-                    <span [class]="'ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--' + roleColor(user.role)">{{ roleLabel(user.role) }}</span>
-                  </td>
-                  <td>{{ user.location }}</td>
-                  <td>
-                    @if (user.status === 'Active') {
-                      <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--green">Active</span>
+                    @if (user.role) {
+                      <span [class]="'ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--' + roleColor(user.role)">{{ roleLabel(user.role) }}</span>
                     } @else {
-                      <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--grey">Inactive</span>
+                      <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--grey">No role</span>
                     }
                   </td>
-                  <td>{{ user.lastActive }}</td>
+                  <td>{{ user.customerType }}</td>
+                  <td>{{ user.location }}</td>
+                  <td>{{ user.totalTickets }}</td>
+                  <td>{{ user.assignedAssets }}</td>
                 </tr>
               }
             </tbody>

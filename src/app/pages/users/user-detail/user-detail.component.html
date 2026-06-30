@@ -39,7 +39,17 @@
         </div>
         <div class="user-detail__hero-id">
           <p class="user-detail__hero-name">{{ user()?.name ?? 'Unknown user' }}</p>
-          <p class="user-detail__hero-sub">{{ userRoleName() || 'Role' }} · {{ user()?.location ?? '—' }}</p>
+          <p class="user-detail__hero-sub">{{ heroSubtitle() }}</p>
+        </div>
+        <!-- Primary action: agents create a ticket for this user without leaving the
+             profile. The composer isn't built in the prototype, so it opens the
+             navigation-intent dialog (same stand-in the rest of this page uses). -->
+        <div class="user-detail__hero-actions">
+          <button class="ds-button ds-button--filled ds-button--leading-icon" type="button"
+                  (click)="createTicketIntent()">
+            <span class="ds-icon">add</span>
+            Create ticket
+          </button>
         </div>
       </div>
       <div class="ds-divider user-detail__divider" role="separator" aria-hidden="true"></div>
@@ -143,6 +153,109 @@
         <!-- TODO eng: wire real ticket aggregates + recent activity. -->
       </section>
 
+      <!-- ── Fees & Parts — left-column sections below Tickets, student profiles only.
+           Fees are client-defined charges (the district sets them up and may waive them);
+           Parts are consumables used on the student's assets. Both link back to a ticket. ─ -->
+      @if (user()?.role === 'student') {
+
+        <!-- Fees -->
+        <section class="ds-card ds-card--elevated" aria-label="Fees">
+          <div class="ds-card__body">
+            @if (fees().length) {
+              <div class="user-detail__summary">
+                <div class="user-detail__summary-intro">
+                  <h2 class="user-detail__summary-title">Fee Summary</h2>
+                  <p class="user-detail__summary-sub">{{ feeSummary().sub }}</p>
+                </div>
+                <dl class="user-detail__summary-totals">
+                  @for (total of feeSummary().totals; track total.label) {
+                    <div class="user-detail__summary-total" [class.user-detail__summary-total--emphasis]="total.emphasis">
+                      <dt class="user-detail__summary-total-label">{{ total.label }}</dt>
+                      <dd class="user-detail__summary-total-value">{{ total.value }}</dd>
+                    </div>
+                  }
+                </dl>
+              </div>
+
+              <div class="user-detail__table-wrap">
+                <table class="user-detail__table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Fee</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Ticket</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (fee of fees(); track fee.name) {
+                      <tr>
+                        <td>{{ fee.name }}</td>
+                        <td>{{ money(fee.amount) }}</td>
+                        <td><span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--grey">{{ fee.status }}</span></td>
+                        <td><button class="user-detail__ticket-link" type="button" (click)="showTicketRefIntent(fee.ticket)" [attr.aria-label]="'Ticket #' + fee.ticket">{{ fee.ticket }}</button></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="user-detail__empty">No fees on this account.</p>
+            }
+          </div>
+          <!-- TODO eng: wire real fees + waivers for this student. -->
+        </section>
+
+        <!-- Parts -->
+        <section class="ds-card ds-card--elevated" aria-label="Parts">
+          <div class="ds-card__body">
+            @if (parts().length) {
+              <div class="user-detail__summary">
+                <div class="user-detail__summary-intro">
+                  <h2 class="user-detail__summary-title">Part Summary</h2>
+                  <p class="user-detail__summary-sub">{{ partSummary().sub }}</p>
+                </div>
+                <dl class="user-detail__summary-totals">
+                  @for (total of partSummary().totals; track total.label) {
+                    <div class="user-detail__summary-total" [class.user-detail__summary-total--emphasis]="total.emphasis">
+                      <dt class="user-detail__summary-total-label">{{ total.label }}</dt>
+                      <dd class="user-detail__summary-total-value">{{ total.value }}</dd>
+                    </div>
+                  }
+                </dl>
+              </div>
+
+              <div class="user-detail__table-wrap">
+                <table class="user-detail__table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Part</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Ticket</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (part of parts(); track part.name) {
+                      <tr>
+                        <td>{{ part.name }}</td>
+                        <td>{{ money(part.amount) }}</td>
+                        <td><span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--grey">{{ part.status }}</span></td>
+                        <td><button class="user-detail__ticket-link" type="button" (click)="showTicketRefIntent(part.ticket)" [attr.aria-label]="'Ticket #' + part.ticket">{{ part.ticket }}</button></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="user-detail__empty">No parts recorded for this student.</p>
+            }
+          </div>
+          <!-- TODO eng: wire real parts consumed for this student's assets. -->
+        </section>
+
+      }
+
     </div>
 
     <!-- ── Side column ─────────────────────────────────────────────────────── -->
@@ -200,6 +313,14 @@
           <div class="user-detail__section-head user-detail__section-head--count">
             <h2 class="user-detail__section-title" id="ud-assets-title">Assets</h2>
             <span class="ds-badge-indicator ds-badge-indicator--blue" aria-hidden="true">{{ assets.length }}</span>
+            <!-- One action for both assigning a new asset and changing current ones.
+                 The assignment flow isn't built in the prototype, so it opens the
+                 navigation-intent dialog (same stand-in the rest of this page uses). -->
+            <button class="ds-button ds-button--filled ds-button--sm ds-button--leading-icon user-detail__section-action"
+                    type="button" (click)="assignAssetsIntent()">
+              <span class="ds-icon ds-icon--sm">edit</span>
+              Manage assets
+            </button>
           </div>
           <div class="user-detail__list">
             @for (asset of assets; track asset.tag) {
