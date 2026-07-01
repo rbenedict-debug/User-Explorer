@@ -28,7 +28,7 @@ export class AllRolesTableComponent implements AfterViewInit, OnDestroy {
     'teacher':         { label: 'Teacher',           color: 'purple' },
     'staff':           { label: 'Staff',             color: 'orange' },
     'student':         { label: 'Student',           color: 'green' },
-    'parent-guardian': { label: 'Parent / Guardian', color: 'pink' },
+    'parent':          { label: 'Parent', color: 'pink' },
     'guest':           { label: 'Guest',             color: 'teal' },
   };
 
@@ -49,7 +49,7 @@ export class AllRolesTableComponent implements AfterViewInit, OnDestroy {
     { name: 'Phone',             width: 150, type: 'text',   _categorical: false, _badgeOptions: null },
     { name: 'Role',              width: 160, type: 'badge',  _categorical: true,  _badgeOptions: [
       { l: 'Agent', c: 'blue' }, { l: 'Teacher', c: 'purple' }, { l: 'Staff', c: 'orange' },
-      { l: 'Student', c: 'green' }, { l: 'Parent / Guardian', c: 'pink' }, { l: 'Guest', c: 'teal' },
+      { l: 'Student', c: 'green' }, { l: 'Parent', c: 'pink' }, { l: 'Guest', c: 'teal' },
       { l: 'No role', c: 'grey' },
     ] },
     { name: 'Customer Type',     width: 170, type: 'text',   _categorical: true,  _badgeOptions: null },

@@ -223,6 +223,60 @@
   color: var(--color-text-secondary);
 }
 
+/* The legacy customer type rides in the subtitle as a "Customer Type: value" pair
+   with a hover / focus tooltip — the label + tooltip flag it as a retained-for-old-
+   clients field (not a role), so it stays clear even when the value repeats the
+   role label. The dot separator is decorative, so it's hidden from assistive tech. */
+.user-detail__hero-ct {
+  position: relative; /* anchor for the absolute tooltip */
+  display: inline-block;
+}
+
+.user-detail__hero-ct-value {
+  border-radius: var(--radius-sm);
+  cursor: help; /* informational, not clickable — hint that hover reveals more */
+
+  &:focus { outline: none; }
+  &:focus-visible { box-shadow: 0 0 0 3px var(--color-border-ada-focus-ring); }
+}
+
+/* "Customer Type" label — same size as the rest of the subtitle; the gap after
+   the colon sets it off from the value. */
+.user-detail__hero-ct-label {
+  margin-inline-end: var(--spacing-xs);
+}
+
+/* Self-contained tooltip styled to the DS tooltip spec (dark bubble, body-small),
+   revealed on hover / keyboard focus. The DS class-API tooltip only reveals in the
+   preview, so the design-mode stand-in owns show/hide.
+   TODO eng: replace with the [dsTooltip] directive. */
+.user-detail__hero-ct-tip {
+  position: absolute;
+  top: calc(100% + var(--spacing-xs));
+  left: 0;
+  z-index: 5;
+  width: max-content;
+  max-width: 16rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-tooltip);
+  color: var(--color-text-tooltip);
+  @include ds.type-body-small;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.user-detail__hero-ct:hover .user-detail__hero-ct-tip,
+.user-detail__hero-ct:focus-within .user-detail__hero-ct-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.user-detail__hero-sub-sep {
+  margin-inline: var(--spacing-xs);
+}
+
 .user-detail__info-value,
 .user-detail__note-text,
 .user-detail__linked-name,

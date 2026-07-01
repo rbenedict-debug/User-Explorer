@@ -10,6 +10,10 @@ import { UserRow, findUserById, linkedUsers, roleLabel } from '../users.data';
 // A field holds either a single value or several stacked values (e.g. a guardian
 // with multiple emails / phones).
 interface InfoField { label: string; value: string | string[]; }
+// A hero subtitle segment. A segment carrying a `label` + `tooltip` renders as a
+// "Label: value" pair with a hover / focus tooltip — used for the legacy customer
+// type so an agent can tell it's a retained-for-old-clients field, not a role.
+interface HeroSegment { text: string; label?: string; tooltip?: string; }
 interface AssetRow { icon: string; name: string; tag: string; status: string; color: string; }
 interface TicketStat { icon: string; label: string; value: string; tone: 'blue' | 'orange' | 'purple' | 'grey'; }
 interface RecentTicket { subject: string; status: string; color: string; date: string; }
@@ -58,17 +62,27 @@ export class UserDetailComponent {
   readonly category = computed(() => this.params().category);
   readonly user = computed(() => findUserById(this.params().user));
 
-  // Hero subtitle. Roled users read "Role · Building". Legacy users whose client
-  // never adopted the authenticated portal have no role, so they fall back to their
-  // customer type — "Community Member (no role) · Building" — which is the only
-  // grouping dimension they carry.
-  readonly heroSubtitle = computed(() => {
+  // Hero subtitle segments: Role · Customer Type · Building. Customer Type is a
+  // legacy grouping most users carry (agents have none); it's shown as its own "Customer Type:
+  // value" segment (omitted when absent) with a hover / focus tooltip, so an agent
+  // can tell it's the retained-for-old-clients field rather than another role —
+  // even when it repeats the role label (a Student whose legacy customer type is
+  // also "Student"). Legacy users whose client never adopted the authenticated
+  // portal have no role, so their role segment reads "No role" with the customer
+  // type (their only grouping dimension) beside it.
+  readonly heroSegments = computed<HeroSegment[]>(() => {
     const u = this.user();
-    if (!u) return '';
-    const primary = u.role
-      ? roleLabel(u.role)
-      : (u.customerType ? `${u.customerType} (no role)` : 'No role');
-    return u.location ? `${primary} · ${u.location}` : primary;
+    if (!u) return [];
+    const segments: HeroSegment[] = [{ text: u.role ? roleLabel(u.role) : 'No role' }];
+    if (u.customerType) {
+      segments.push({
+        label: 'Customer Type',
+        text: u.customerType,
+        tooltip: 'Legacy customer type — kept for older clients, not used going forward.',
+      });
+    }
+    if (u.location) segments.push({ text: u.location });
+    return segments;
   });
 
   // Avatar monogram from the user's name.
@@ -82,9 +96,12 @@ export class UserDetailComponent {
     const u = this.user();
     if (!u) return [];
     const fields = this.fieldsFor(u.role, u);
-    // Customer Type is a first-class legacy field every user carries (and the only
-    // grouping for role-less users) — surface it right after Email.
-    fields.splice(1, 0, { label: 'Customer Type', value: u.customerType ?? '—' });
+    // Customer Type is a legacy grouping — surfaced right after Email for the users
+    // that carry one (and the only grouping for role-less users). Agents (internal
+    // support staff) have none, so the field is omitted for them.
+    if (u.customerType) {
+      fields.splice(1, 0, { label: 'Customer Type', value: u.customerType });
+    }
     return fields;
   });
 
@@ -153,7 +170,7 @@ export class UserDetailComponent {
           { label: 'Access Expires', value: 'Aug 31, 2026' },
           { label: 'Date Added',     value: u.dateAdded },
         ];
-      case 'parent-guardian': {
+      case 'parent': {
         // Parents carry minimal direct details — most of the record is their
         // linked students (rendered in the Linked Students section below). Contact
         // info is the exception: some guardians have several emails / phones, so a
@@ -199,9 +216,9 @@ export class UserDetailComponent {
 
     if (u.role === 'student') {
       return {
-        title: 'Parent / Guardian',
+        title: 'Parent',
         badgeColor: 'purple',
-        people: linkedUsers(u.id, 'parent-guardian', 2, u.id).map((p, i) => ({
+        people: linkedUsers(u.id, 'parent', 2, u.id).map((p, i) => ({
           id: p.id,
           role: p.role,
           name: p.name,
@@ -216,7 +233,7 @@ export class UserDetailComponent {
     }
 
     // Parents — and staff members who are also parents — show their linked students.
-    if (u.role === 'parent-guardian' || u.role === 'staff') {
+    if (u.role === 'parent' || u.role === 'staff') {
       return {
         title: 'Linked Students',
         badgeColor: 'brand',

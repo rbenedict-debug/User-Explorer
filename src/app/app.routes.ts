@@ -34,7 +34,7 @@ export const routes: Routes = [
       { path: 'role/teacher',         component: TeacherTableComponent },
       { path: 'role/staff',           component: StaffTableComponent },
       { path: 'role/student',         component: StudentTableComponent },
-      { path: 'role/parent-guardian', component: ParentGuardianTableComponent },
+      { path: 'role/parent',          component: ParentGuardianTableComponent },
       { path: 'role/guest',           component: GuestTableComponent },
 
       // Grade & location drill-down — one shared table each, scoped by slug.

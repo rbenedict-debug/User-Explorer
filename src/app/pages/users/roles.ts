@@ -20,6 +20,6 @@ export const USER_ROLES: UserRole[] = [
   { slug: 'teacher',         name: 'Teacher',           icon: 'school',          color: 'purple',  count: '1,024 users' },
   { slug: 'staff',           name: 'Staff',             icon: 'badge',           color: 'orange',  count: '256 users' },
   { slug: 'student',         name: 'Student',           icon: 'backpack',        color: 'green',   count: '8,932 users' },
-  { slug: 'parent-guardian', name: 'Parent / Guardian', icon: 'family_restroom', color: 'pink',    count: '5,310 users' },
+  { slug: 'parent', name: 'Parent', icon: 'family_restroom', color: 'pink',    count: '5,310 users' },
   { slug: 'guest',           name: 'Guest',             icon: 'account_circle',  color: 'teal',    count: '42 users' },
 ];

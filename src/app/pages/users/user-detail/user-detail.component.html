@@ -39,7 +39,28 @@
         </div>
         <div class="user-detail__hero-id">
           <p class="user-detail__hero-name">{{ user()?.name ?? 'Unknown user' }}</p>
-          <p class="user-detail__hero-sub">{{ heroSubtitle() }}</p>
+          <p class="user-detail__hero-sub">
+            @for (seg of heroSegments(); track $index) {
+              @if (!$first) {
+                <span class="user-detail__hero-sub-sep" aria-hidden="true">·</span>
+              }
+              @if (seg.tooltip) {
+                <!-- Legacy customer type: "Customer Type: value" text + hover/focus
+                     tooltip so an agent can tell it's a retained-for-old-clients
+                     field, not a role. Self-contained CSS tooltip — the DS class-API
+                     tooltip only reveals in the preview (real reveal is [dsTooltip]). -->
+                <!-- TODO eng: replace with the [dsTooltip] directive. -->
+                <span class="user-detail__hero-ct">
+                  <span class="user-detail__hero-ct-value" tabindex="0" aria-describedby="ud-ct-tip">
+                    <span class="user-detail__hero-ct-label">{{ seg.label }}:</span>{{ seg.text }}
+                  </span>
+                  <span class="user-detail__hero-ct-tip" id="ud-ct-tip" role="tooltip">{{ seg.tooltip }}</span>
+                </span>
+              } @else {
+                <span>{{ seg.text }}</span>
+              }
+            }
+          </p>
         </div>
         <!-- Primary action: agents create a ticket for this user without leaving the
              profile. The composer isn't built in the prototype, so it opens the

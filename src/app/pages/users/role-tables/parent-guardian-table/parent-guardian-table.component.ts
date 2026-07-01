@@ -17,7 +17,7 @@ export class ParentGuardianTableComponent implements AfterViewInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly host = inject(ElementRef).nativeElement as HTMLElement;
 
-  private readonly roleSlug = 'parent-guardian';
+  private readonly roleSlug = 'parent';
   readonly users = signal<UserRow[]>(usersByRole(this.roleSlug));
 
   readonly columns = [
