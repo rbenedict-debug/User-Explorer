@@ -1,4 +1,5 @@
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -33,7 +34,7 @@ interface SectionSummary { sub: string; totals: SummaryTotal[]; }
 
 @Component({
   selector: 'app-user-detail',
-  imports: [RouterLink],
+  imports: [RouterLink, NgTemplateOutlet],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss',
   host: { class: 'ds-page-content', role: 'main' }
@@ -261,28 +262,61 @@ export class UserDetailComponent {
     return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
   }
 
-  // ── Filler section data — layout placeholders until real sources are wired.
+  // Agents are the product's internal users (support staff), not the end users the
+  // rest of these sections describe. So their Assets and Tickets cards differ: no
+  // district-issued devices, and only the occasional ticket they open for
+  // themselves. Both cards stay visible and fall back to an empty state.
+  readonly isAgent = computed(() => this.user()?.role === 'agent');
+
+  // ── Assets — devices assigned to this user. End users carry the filler
+  // assignments; agents aren't issued district devices, so their card shows the
+  // empty state (Manage assets stays available to assign one).
   // TODO eng: replace with real asset assignments for this user.
-  readonly assets: AssetRow[] = [
+  private readonly assetFiller: AssetRow[] = [
     { icon: 'laptop_chromebook', name: 'Chromebook 11 G9',      tag: 'CHB-2041', status: 'Assigned', color: 'green' },
     { icon: 'tablet_mac',        name: 'iPad (9th gen)',        tag: 'IPD-0088', status: 'Assigned', color: 'green' },
     { icon: 'headphones',        name: 'Logitech H390 Headset', tag: 'ACC-1190', status: 'On loan',  color: 'yellow' },
   ];
+  readonly assets = computed<AssetRow[]>(() => (this.isAgent() ? [] : this.assetFiller));
 
+  // ── Ticket stats — the four-status roll-up only makes sense for end users with a
+  // support history. Agents' own tickets show as a plain list (below), so agents
+  // get no stat grid.
   // TODO eng: replace with real ticket aggregates for this user.
-  readonly ticketStats: TicketStat[] = [
+  private readonly ticketStatsFiller: TicketStat[] = [
     { icon: 'inbox',        label: 'Unopened',        value: '2',  tone: 'blue' },
     { icon: 'autorenew',    label: 'In Progress',     value: '1',  tone: 'orange' },
     { icon: 'pending',      label: 'Pending Details', value: '1',  tone: 'purple' },
     { icon: 'check_circle', label: 'Closed',          value: '14', tone: 'grey' },
   ];
+  readonly ticketStats = computed<TicketStat[]>(() => (this.isAgent() ? [] : this.ticketStatsFiller));
 
-  // TODO eng: replace with this user's real recent tickets.
-  readonly recentTickets: RecentTicket[] = [
+  // ── Recent tickets — tickets THIS user opened (as the requester). End users get
+  // the filler history. For agents this is the handful they file for themselves,
+  // not their work queue: most have none (→ empty state), a couple have opened one
+  // or two. Keyed by id so the examples are stable per profile.
+  // TODO eng: replace with this user's real opened tickets.
+  private readonly recentTicketsFiller: RecentTicket[] = [
     { subject: 'Chromebook won’t charge',  status: 'In Progress',     color: 'orange', date: 'Jun 7, 2026' },
     { subject: 'Password reset request',   status: 'Pending Details', color: 'purple', date: 'Jun 4, 2026' },
     { subject: 'Projector not displaying', status: 'Closed',          color: 'grey',   date: 'May 28, 2026' },
   ];
+  private readonly agentOpenedTickets: Record<string, RecentTicket[]> = {
+    adm3: [
+      { subject: 'Office desktop won’t power on', status: 'In Progress', color: 'orange', date: 'Jun 12, 2026' },
+      { subject: 'New projector remote',          status: 'Closed',      color: 'grey',   date: 'May 20, 2026' },
+    ],
+    tec3: [
+      { subject: 'Replacement stylus for field tablet', status: 'Pending Details', color: 'purple', date: 'Jun 10, 2026' },
+      { subject: 'VPN access on home laptop',           status: 'Closed',          color: 'grey',   date: 'May 15, 2026' },
+    ],
+  };
+  readonly recentTickets = computed<RecentTicket[]>(() => {
+    const u = this.user();
+    if (!u) return [];
+    if (u.role === 'agent') return this.agentOpenedTickets[u.id] ?? [];
+    return this.recentTicketsFiller;
+  });
 
   /** Format a whole-dollar amount for display: 251 → "$251". */
   money(amount: number): string {

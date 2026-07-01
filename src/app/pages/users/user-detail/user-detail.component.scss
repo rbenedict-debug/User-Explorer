@@ -552,3 +552,11 @@
   @include ds.type-body-medium;
   color: var(--color-text-secondary);
 }
+
+/* Branded empty state (DS ds-empty-state) inside a card body — centered with a bit
+   of vertical breathing room. Used by the Assets and Tickets cards on agent profiles. */
+.user-detail__empty-state {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--spacing-lg);
+}
