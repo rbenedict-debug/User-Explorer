@@ -168,6 +168,21 @@
   padding-inline: var(--spacing-md);
 }
 
+/* Asset status badge, stacked above the name (top-left) instead of a trailing
+   slot. The card-item body is a flex column, so pin the pill to the start edge
+   (otherwise it stretches full width) and add a little space below it. */
+.user-detail__asset-status {
+  align-self: flex-start;
+  margin-bottom: var(--spacing-xs);
+}
+
+/* A badged asset row is a line taller than the DS card-item's centered two-line
+   height, so its content ends up flush with the top and bottom edges. Give just
+   that case block padding; plain two-line rows keep the DS default spacing. */
+.ds-card-item__body:has(.user-detail__asset-status) {
+  padding-block: var(--spacing-md);
+}
+
 /* Ticket stats */
 .user-detail__stats {
   display: grid;

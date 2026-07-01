@@ -367,18 +367,20 @@
           @if (assets().length) {
             <div class="user-detail__list">
               @for (asset of assets(); track asset.tag) {
-                <div class="ds-card-item ds-card-item--no-leading ds-card-item--interactive"
+                <div class="ds-card-item ds-card-item--no-leading ds-card-item--no-trailing ds-card-item--interactive"
                      role="button" tabindex="0"
                      [attr.aria-label]="'Open asset: ' + asset.name"
                      (click)="showAssetIntent(asset)"
                      (keydown.enter)="showAssetIntent(asset)"
                      (keydown.space)="$event.preventDefault(); showAssetIntent(asset)">
                   <div class="ds-card-item__body">
+                    <!-- Only non-standard states get a badge, top-left above the name;
+                         "Assigned" is the norm, so it carries no pill. -->
+                    @if (asset.status !== 'Assigned') {
+                      <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ asset.color }} user-detail__asset-status">{{ asset.status }}</span>
+                    }
                     <span class="ds-card-item__primary">{{ asset.name }}</span>
                     <span class="ds-card-item__secondary">Asset #{{ asset.tag }}</span>
-                  </div>
-                  <div class="ds-card-item__trailing user-detail__row-inset">
-                    <span class="ds-label ds-label--pill ds-label--xs ds-label--outline ds-label--{{ asset.color }}">{{ asset.status }}</span>
                   </div>
                 </div>
               }
